@@ -2,14 +2,14 @@ server:
   port: 8090
 spring:
   datasource:
-    url: jdbc:postgresql://containers-us-west-156.railway.app:6324/railway
+    url: jdbc:postgresql://containers-us-west-68.railway.app:6375/railway
     username: postgres
-    password: mGlXdnkhhVThDSi8fV6M
+    password: omcJPBDPuMPGBa6P0t0Q
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     show-sql: true
     properties:
       hibernate:
