@@ -95,4 +95,20 @@ public class OrderController {
         return orderService.findAllBySort(request);
     }
 
+    @Operation(description = "getting delivery price")
+    @GetMapping("/get-delivery-price")
+    @ApiResponse(description = "Delivery price")
+    public ApiResult<String> getDeliveryPrice() {
+        log.info("getDeliveryPrice request");
+        return orderService.getDeliveryPrice();
+    }
+
+    @Operation(description = "setting delivery price")
+    @PostMapping("/set-delivery-price")
+    @ApiResponse(description = " Set Delivery price")
+    public ApiResult<String> setDeliveryPrice(@RequestParam Long price) {
+        log.info("getDeliveryPrice request");
+        return orderService.setDeliveryPrice(price);
+    }
+
 }

@@ -1,10 +1,9 @@
 package uz.md.shopapp.service.impl;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import uz.md.shopapp.domain.Category;
 import uz.md.shopapp.domain.Product;
@@ -24,11 +23,10 @@ import uz.md.shopapp.repository.CategoryRepository;
 import uz.md.shopapp.repository.ProductRepository;
 import uz.md.shopapp.repository.UserRepository;
 import uz.md.shopapp.service.QueryService;
-import uz.md.shopapp.service.contract.FilesStorageService;
+import uz.md.shopapp.file_storage.FilesStorageService;
 import uz.md.shopapp.service.contract.ProductService;
 import uz.md.shopapp.utils.CommonUtils;
 
-import java.nio.file.Path;
 import java.util.List;
 
 import static uz.md.shopapp.utils.MessageConstants.ERROR_IN_REQUEST_RU;
@@ -36,17 +34,9 @@ import static uz.md.shopapp.utils.MessageConstants.ERROR_IN_REQUEST_UZ;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
+@SuppressWarnings("duplicates")
 public class ProductServiceImpl implements ProductService {
-
-    @Value("${app.images.products.root.path}")
-    private String productsPath;
-
-    private Path productsImagesRoot;
-
-    @PostConstruct
-    public void init() {
-        productsImagesRoot = Path.of(productsPath);
-    }
 
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
@@ -143,7 +133,7 @@ public class ProductServiceImpl implements ProductService {
                         .messageUz("YOU HAVE NO PERMISSION")
                         .build();
     }
-
+    
     private User getCurrentUser() {
         String phoneNumber = CommonUtils.getCurrentUserPhoneNumber();
         return userRepository
@@ -293,8 +283,14 @@ public class ProductServiceImpl implements ProductService {
                         .messageUz("PRODUCT NOT FOUND")
                         .messageRu("")
                         .build());
-        filesStorageService.save(image, productsImagesRoot);
-        product.setImageUrl(productsImagesRoot.toUri() + image.getOriginalFilename());
+
+        String savedFileURL = filesStorageService.save(image,
+                product.getNameUz() != null ? product.getNameUz() : image.getOriginalFilename());
+
+        if (product.getImageUrl() != null)
+            filesStorageService.delete(product.getImageUrl());
+
+        product.setImageUrl(savedFileURL);
         productRepository.save(product);
         return ApiResult.successResponse();
     }

@@ -62,4 +62,8 @@ public interface OrderService {
      * @return list of products
      */
     ApiResult<List<OrderDTO>> getOrdersByUserId(UUID userid, String pagination);
+
+    ApiResult<String> getDeliveryPrice();
+
+    ApiResult<String> setDeliveryPrice(Long price);
 }

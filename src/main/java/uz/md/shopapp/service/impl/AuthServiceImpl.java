@@ -38,6 +38,7 @@ import static uz.md.shopapp.utils.MessageConstants.*;
 
 @Service
 @Slf4j
+@Transactional
 public class AuthServiceImpl implements AuthService {
 
     private final RoleRepository roleRepository;
@@ -261,7 +262,6 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional
     public ApiResult<String> getSMSCode(String phoneNumber) {
 
         if (phoneNumber == null)

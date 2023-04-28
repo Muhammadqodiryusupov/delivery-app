@@ -8,11 +8,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import uz.md.shopapp.client.SmsSender;
 import uz.md.shopapp.domain.*;
 import uz.md.shopapp.domain.enums.PermissionEnum;
 import uz.md.shopapp.repository.*;
-import uz.md.shopapp.service.contract.FilesStorageService;
 
 import java.util.List;
 import java.util.Objects;
@@ -24,7 +22,7 @@ import static uz.md.shopapp.domain.enums.PermissionEnum.*;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Profile(value = {"test","dev"})
+@Profile(value = {"test"})
 public class DataLoader implements CommandLineRunner {
 
     private final LocationRepository locationRepository;
@@ -35,8 +33,6 @@ public class DataLoader implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final FilesStorageService filesStorageService;
-    private final SmsSender smsSender;
 
     @Value("${app.admin.firstName}")
     private String firstName;
@@ -82,7 +78,6 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        filesStorageService.init();
         System.out.println("activeProfile = " + activeProfile);
         if (Objects.equals("create", modeType)) {
 //            smsSender.login(LoginRequest

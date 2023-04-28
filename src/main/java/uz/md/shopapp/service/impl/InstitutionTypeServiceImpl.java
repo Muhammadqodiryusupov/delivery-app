@@ -1,5 +1,7 @@
 package uz.md.shopapp.service.impl;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import uz.md.shopapp.domain.InstitutionType;
@@ -23,19 +25,13 @@ import java.util.List;
 import static uz.md.shopapp.utils.MessageConstants.*;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class InstitutionTypeServiceImpl implements InstitutionTypeService {
 
     private final InstitutionTypeRepository institutionTypeRepository;
     private final InstitutionTypeMapper institutionTypeMapper;
     private final UserRepository userRepository;
-
-    public InstitutionTypeServiceImpl(InstitutionTypeRepository institutionTypeRepository,
-                                      InstitutionTypeMapper institutionTypeMapper,
-                                      UserRepository userRepository) {
-        this.institutionTypeRepository = institutionTypeRepository;
-        this.institutionTypeMapper = institutionTypeMapper;
-        this.userRepository = userRepository;
-    }
 
     private void checkForPermission() {
         User currentUser = getCurrentUser();
@@ -57,6 +53,8 @@ public class InstitutionTypeServiceImpl implements InstitutionTypeService {
 
     @Override
     public ApiResult<InstitutionTypeDTO> add(InstitutionTypeAddDTO dto) {
+
+        log.info("Adding new InstitutionType");
 
         checkForPermission();
 
@@ -85,11 +83,14 @@ public class InstitutionTypeServiceImpl implements InstitutionTypeService {
     @Override
     public ApiResult<InstitutionTypeDTO> findById(Long id) {
 
+        log.info("findById called");
+
         if (id == null)
             throw BadRequestException.builder()
                     .messageUz(ERROR_IN_REQUEST_UZ)
                     .messageRu(ERROR_IN_REQUEST_RU)
                     .build();
+
         return ApiResult.successResponse(institutionTypeMapper
                 .toDTO(institutionTypeRepository
                         .findById(id)
@@ -101,6 +102,8 @@ public class InstitutionTypeServiceImpl implements InstitutionTypeService {
 
     @Override
     public ApiResult<InstitutionTypeDTO> edit(InstitutionTypeEditDTO editDTO) {
+
+        log.info("Editing InstitutionType");
 
         checkForPermission();
 
@@ -133,6 +136,9 @@ public class InstitutionTypeServiceImpl implements InstitutionTypeService {
 
     @Override
     public ApiResult<List<InstitutionTypeDTO>> getAll() {
+
+        log.info("Getting all institutionTypes...");
+
         return ApiResult.successResponse(
                 institutionTypeMapper.toDTOList(
                         institutionTypeRepository.findAll()
@@ -142,6 +148,9 @@ public class InstitutionTypeServiceImpl implements InstitutionTypeService {
 
     @Override
     public ApiResult<List<InstitutionTypeDTO>> getAllByPage(String page) {
+
+        log.info("getAllByPage method");
+
         if (page == null)
             throw BadRequestException.builder()
                     .messageUz(ERROR_IN_REQUEST_UZ)
@@ -158,6 +167,9 @@ public class InstitutionTypeServiceImpl implements InstitutionTypeService {
 
     @Override
     public ApiResult<Void> delete(Long id) {
+
+        log.info("deleting institutionType with id " + id);
+
         checkForPermission();
         if (id == null)
             throw BadRequestException.builder()

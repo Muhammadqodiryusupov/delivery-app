@@ -1,9 +1,11 @@
 package uz.md.shopapp.service.impl;
 
-import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import uz.md.shopapp.domain.Institution;
 import uz.md.shopapp.domain.InstitutionType;
@@ -17,70 +19,54 @@ import uz.md.shopapp.exceptions.AlreadyExistsException;
 import uz.md.shopapp.exceptions.BadRequestException;
 import uz.md.shopapp.exceptions.NotAllowedException;
 import uz.md.shopapp.exceptions.NotFoundException;
+import uz.md.shopapp.file_storage.FilesStorageService;
 import uz.md.shopapp.mapper.InstitutionMapper;
 import uz.md.shopapp.repository.InstitutionRepository;
 import uz.md.shopapp.repository.InstitutionTypeRepository;
 import uz.md.shopapp.repository.LocationRepository;
 import uz.md.shopapp.repository.UserRepository;
-import uz.md.shopapp.service.contract.FilesStorageService;
 import uz.md.shopapp.service.contract.InstitutionService;
 
-import java.nio.file.Path;
 import java.util.List;
 
 import static uz.md.shopapp.utils.MessageConstants.*;
 
 @Service
+@Transactional
+@Slf4j
+@RequiredArgsConstructor
 public class InstitutionServiceImpl implements InstitutionService {
 
-    @Value("${app.images.institutions.root.path}")
-    private String institutionsPath;
-
-    private Path institutionsImagesRoot;
-
-    @PostConstruct
-    public void init() {
-        institutionsImagesRoot = Path.of(institutionsPath);
-    }
-
+    // region Beans
     private final InstitutionRepository institutionRepository;
     private final InstitutionMapper institutionMapper;
     private final FilesStorageService filesStorageService;
     private final UserRepository userRepository;
     private final InstitutionTypeRepository institutionTypeRepository;
     private final LocationRepository locationRepository;
-
-    public InstitutionServiceImpl(InstitutionRepository institutionRepository,
-                                  InstitutionMapper institutionMapper,
-                                  FilesStorageService filesStorageService,
-                                  UserRepository userRepository,
-                                  InstitutionTypeRepository institutionTypeRepository,
-                                  LocationRepository locationRepository) {
-        this.institutionRepository = institutionRepository;
-        this.institutionMapper = institutionMapper;
-        this.filesStorageService = filesStorageService;
-        this.userRepository = userRepository;
-        this.institutionTypeRepository = institutionTypeRepository;
-        this.locationRepository = locationRepository;
-    }
+    // endregion
 
     @Override
     public ApiResult<InstitutionDTO> add(InstitutionAddDTO dto) {
+
+        log.info("add method called");
 
         if (dto == null
                 || dto.getNameUz() == null
                 || dto.getNameRu() == null
                 || dto.getInstitutionTypeId() == null
-                || dto.getManagerId() == null)
+                || dto.getManagerId() == null) {
+            log.info("Bad request");
             throw BadRequestException.builder()
                     .messageUz(ERROR_IN_REQUEST_UZ)
                     .messageRu(ERROR_IN_REQUEST_RU)
                     .build();
+        }
 
         if (institutionRepository.existsByNameUzOrNameRu(dto.getNameUz(), dto.getNameRu()))
             throw AlreadyExistsException.builder()
-                    .messageRu("")
-                    .messageUz("INSTITUTION_NAME_ALREADY_EXISTS")
+                    .messageUz("Muassasa nomi allaqachon mavjud")
+                    .messageRu("название учреждения уже существует")
                     .build();
 
         Institution institution = institutionMapper
@@ -98,14 +84,14 @@ public class InstitutionServiceImpl implements InstitutionService {
         User manager = userRepository
                 .findById(dto.getManagerId())
                 .orElseThrow(() -> NotFoundException.builder()
-                        .messageUz("MANAGER_NOT_FOUND")
-                        .messageRu("")
+                        .messageUz("Menejer topilmadi")
+                        .messageRu("Контроллер не найден")
                         .build());
 
         if (!manager.getRole().getName().equals("MANAGER"))
             throw NotAllowedException.builder()
-                    .messageRu("")
-                    .messageUz("User with id " + dto.getManagerId() + " is not a manager")
+                    .messageUz("Ushbu " + dto.getManagerId() + " IDli foydalanuvchi manejer emas")
+                    .messageRu("Пользователь с идентификатором " + dto.getManagerId() + " не является менеджером")
                     .build();
 
         institution.setManager(manager);
@@ -215,21 +201,30 @@ public class InstitutionServiceImpl implements InstitutionService {
                 .getContent());
     }
 
+    @Async
     @Override
     public ApiResult<Void> setImage(Long institutionId, MultipartFile image) {
+
         if (institutionId == null || image == null)
             throw BadRequestException.builder()
                     .messageUz(ERROR_IN_REQUEST_UZ)
                     .messageRu(ERROR_IN_REQUEST_RU)
                     .build();
+
         Institution institution = institutionRepository
                 .findById(institutionId)
                 .orElseThrow(() -> NotFoundException.builder()
                         .messageUz(INSTITUTION_NOT_FOUND_UZ)
                         .messageRu(INSTITUTION_NOT_FOUND_RU)
                         .build());
-        filesStorageService.save(image, institutionsImagesRoot);
-        institution.setImageUrl(institutionsImagesRoot.toUri() + image.getOriginalFilename());
+
+        String savedImageURL = filesStorageService.save(image,
+                institution.getNameUz() != null ? institution.getNameUz() : image.getOriginalFilename());
+
+        if (institution.getImageUrl() != null)
+            filesStorageService.delete(institution.getImageUrl());
+
+        institution.setImageUrl(savedImageURL);
         institutionRepository.save(institution);
         return ApiResult.successResponse();
     }

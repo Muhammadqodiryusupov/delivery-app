@@ -1,5 +1,7 @@
 package uz.md.shopapp.service.impl;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,40 +29,35 @@ import java.util.List;
 import static uz.md.shopapp.utils.MessageConstants.*;
 
 @Service
+@RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class ClientServiceImpl implements ClientService {
+
+    // region Beans
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final OrderMapper orderMapper;
     private final AddressMapper addressMapper;
     private final OrderRepository orderRepository;
     private final AddressRepository addressRepository;
+    // endregion
 
-    public ClientServiceImpl(UserRepository userRepository,
-                             UserMapper userMapper,
-                             OrderMapper orderMapper,
-                             AddressMapper addressMapper,
-                             OrderRepository orderRepository,
-                             AddressRepository addressRepository) {
-        this.userRepository = userRepository;
-        this.userMapper = userMapper;
-        this.orderMapper = orderMapper;
-        this.addressMapper = addressMapper;
-        this.orderRepository = orderRepository;
-        this.addressRepository = addressRepository;
-    }
 
     @Override
     public ApiResult<ClientMeDto> getMe() {
 
+        log.info("getMe");
+
         User user = getCurrentUser();
 
-        if (!user.getRole().getName().equals("CLIENT"))
+        if (!user.getRole().getName().equals("CLIENT")) {
+            log.error("User is not a client");
             throw NotAllowedException.builder()
                     .messageUz("Siz client emassiz")
                     .messageRu("")
                     .build();
-
+        }
         ClientMeDto clientMeDto = userMapper.toClientMeDTO(user);
         Long aLong = orderRepository
                 .countAllByUser_IdAndDeletedIsFalse(clientMeDto.getId());
@@ -70,7 +67,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public ApiResult<List<OrderDTO>> getMyOrders() {
-
+        log.info("getMyOrders method called");
         User user = getCurrentUser();
 
         if (!user.getRole().getName().equals("CLIENT"))
@@ -86,7 +83,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public ApiResult<Void> deleteMyOrders() {
-
+        log.info("deleteMyOrders method called");
         User user = getCurrentUser();
 
         if (!user.getRole().getName().equals("CLIENT"))
@@ -101,6 +98,8 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public ApiResult<List<OrderDTO>> getMyOrders(String page) {
+
+        log.info("getMyOrders by pagination");
 
         if (page == null)
             throw BadRequestException.builder()
@@ -128,6 +127,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public ApiResult<List<AddressDTO>> getMyAddresses() {
 
+        log.info("getMyAddresses called");
         User user = getCurrentUser();
 
         if (!user.getRole().getName().equals("CLIENT"))
@@ -143,13 +143,15 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public ApiResult<AddressDTO> addAddress(AddressAddDTO addressAddDTO) {
-
+        log.info("addAddress called");
         if (addressAddDTO == null
-                || addressAddDTO.getLocation() == null)
+                || addressAddDTO.getLocation() == null) {
+            log.error("Bad request");
             throw BadRequestException.builder()
                     .messageUz(ERROR_IN_REQUEST_UZ)
                     .messageRu(ERROR_IN_REQUEST_RU)
                     .build();
+        }
 
         User user = userRepository
                 .findById(addressAddDTO.getUserId())
@@ -158,14 +160,19 @@ public class ClientServiceImpl implements ClientService {
                         .messageUz(USER_NOT_FOUND_UZ)
                         .messageRu(USER_NOT_FOUND_RU)
                         .build());
+
         Address address = addressMapper.fromAddDTO(addressAddDTO);
+
         address.setUser(user);
         addressRepository.save(address);
+
         return ApiResult.successResponse(addressMapper
                 .toDTO(address));
     }
 
     private User getCurrentUser() {
+
+        log.info("Getting current user");
 
         String phoneNumber = CommonUtils.getCurrentUserPhoneNumber();
 
@@ -185,12 +192,16 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public ApiResult<Void> delete(Long id) {
-        if (id == null)
+
+        log.info("Delete user " + id);
+
+        if (id == null) {
+            log.info("Bad request");
             throw BadRequestException.builder()
                     .messageRu(ERROR_IN_REQUEST_RU)
                     .messageUz(ERROR_IN_REQUEST_UZ)
                     .build();
-
+        }
         addressRepository.deleteById(id);
         return ApiResult.successResponse();
     }

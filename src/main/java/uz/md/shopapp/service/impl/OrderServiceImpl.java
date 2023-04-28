@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.md.shopapp.domain.*;
 import uz.md.shopapp.domain.enums.OrderStatus;
 import uz.md.shopapp.dtos.ApiResult;
@@ -36,7 +37,9 @@ import static uz.md.shopapp.utils.MessageConstants.ERROR_IN_REQUEST_UZ;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class OrderServiceImpl implements OrderService {
+
 
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
@@ -104,14 +107,14 @@ public class OrderServiceImpl implements OrderService {
 
         if (currentUserPhoneNumber == null)
             throw NotFoundException.builder()
-                    .messageUz("foydalanuvchi topilmadi")
+                    .messageUz(MessageConstants.USER_NOT_FOUND_UZ)
                     .messageRu(MessageConstants.USER_NOT_FOUND_RU)
                     .build();
 
         User user = userRepository
                 .findByPhoneNumber(currentUserPhoneNumber)
                 .orElseThrow(() -> NotFoundException.builder()
-                        .messageUz("foydalanuvchi topilmadi")
+                        .messageUz(MessageConstants.USER_NOT_FOUND_UZ)
                         .messageRu(MessageConstants.USER_NOT_FOUND_RU)
                         .build());
 
@@ -122,7 +125,7 @@ public class OrderServiceImpl implements OrderService {
         Long productId = dto.getOrderProducts()
                 .stream()
                 .findFirst()
-                .orElseThrow()
+                .orElseThrow(() -> NotFoundException.builder().build())
                 .getProductId();
 
         Institution institution = productRepository
@@ -256,6 +259,7 @@ public class OrderServiceImpl implements OrderService {
                                         PageRequest.of(page[0], page[1])).getContent()));
     }
 
+
     @Override
     public ApiResult<List<OrderDTO>> getOrdersByUserId(UUID userid, String pagination) {
 
@@ -280,5 +284,15 @@ public class OrderServiceImpl implements OrderService {
                                 .findAllByUserId(user.getId(),
                                         PageRequest.of(page[0], page[1]))
                                 .getContent()));
+    }
+
+    @Override
+    public ApiResult<String> getDeliveryPrice() {
+        return null;
+    }
+
+    @Override
+    public ApiResult<String> setDeliveryPrice(Long price) {
+        return null;
     }
 }

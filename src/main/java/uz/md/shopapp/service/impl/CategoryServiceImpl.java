@@ -1,7 +1,10 @@
 package uz.md.shopapp.service.impl;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.md.shopapp.domain.Category;
 import uz.md.shopapp.domain.Institution;
 import uz.md.shopapp.domain.User;
@@ -27,6 +30,9 @@ import java.util.List;
 import static uz.md.shopapp.utils.MessageConstants.*;
 
 @Service
+@RequiredArgsConstructor
+@Transactional
+@Slf4j
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
@@ -34,26 +40,21 @@ public class CategoryServiceImpl implements CategoryService {
     private final InstitutionRepository institutionRepository;
     private final UserRepository userRepository;
 
-    public CategoryServiceImpl(CategoryRepository categoryRepository,
-                               CategoryMapper categoryMapper,
-                               InstitutionRepository institutionRepository,
-                               UserRepository userRepository) {
-        this.categoryRepository = categoryRepository;
-        this.categoryMapper = categoryMapper;
-        this.institutionRepository = institutionRepository;
-        this.userRepository = userRepository;
-    }
 
     @Override
     public ApiResult<CategoryDTO> add(CategoryAddDTO dto) {
 
+        log.info("add category called");
+
         if (dto == null || dto.getNameUz() == null
                 || dto.getNameRu() == null
-                || dto.getInstitutionId() == null)
+                || dto.getInstitutionId() == null) {
+            log.info("Bad Request in CategoryService add method");
             throw BadRequestException.builder()
                     .messageUz(ERROR_IN_REQUEST_UZ)
                     .messageRu(ERROR_IN_REQUEST_RU)
                     .build();
+        }
 
         User currentUser = getCurrentUser();
 
@@ -64,32 +65,36 @@ public class CategoryServiceImpl implements CategoryService {
                         .messageRu("Объект не найден")
                         .build());
 
-        if (currentUser != null
-                && currentUser.getRole() != null
-                && !currentUser.getRole().getPermissions().contains(PermissionEnum.ADD_CATEGORY))
-            if (institution.getManager() != null
-                    && institution.getManager().getId() != null
-                    && !institution.getManager().getId().equals(currentUser.getId()))
+        if (currentUser.getRole() == null
+                || !currentUser.getRole().getPermissions().contains(PermissionEnum.ADD_CATEGORY))
+            if (institution.getManager() == null
+                    || institution.getManager().getId() == null
+                    || !institution.getManager().getId().equals(currentUser.getId())) {
+                log.error("You have no permissions to add category");
                 throw NotAllowedException.builder()
                         .messageUz("Sizda ruxsat yo'q")
                         .messageRu("У вас нет разрешения")
                         .build();
+            }
 
-        if (categoryRepository.existsByNameUzOrNameRu(dto.getNameUz(), dto.getNameRu()) ||
-                categoryRepository.existsByNameUzOrNameRu(dto.getNameUz(), dto.getNameRu()))
+        if (categoryRepository.existsByNameUzOrNameRu(dto.getNameUz(), dto.getNameRu())) {
+            log.error("Category name already existed");
             throw AlreadyExistsException.builder()
                     .messageUz("Kategoriya nomi allaqachon mavjud")
                     .messageRu("Название категории уже существует")
                     .build();
+        }
 
         Category category = categoryMapper
                 .fromAddDTO(dto);
 
-        if (category == null)
+        if (category == null) {
+            log.error("Adding Category is null");
             throw BadRequestException.builder()
                     .messageUz(CATEGORY_IS_NULL_UZ)
                     .messageRu(CATEGORY_IS_NULL_RU)
                     .build();
+        }
 
         category.setInstitution(institution);
 
@@ -102,11 +107,15 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public ApiResult<CategoryDTO> findById(Long id) {
 
-        if (id == null)
+        log.info("findById method called");
+
+        if (id == null) {
+            log.info("Bad request in findById of CategoryService");
             throw BadRequestException.builder()
                     .messageUz(ERROR_IN_REQUEST_UZ)
                     .messageRu(ERROR_IN_REQUEST_RU)
                     .build();
+        }
 
         return ApiResult.successResponse(categoryMapper
                 .toDTO(categoryRepository
@@ -120,13 +129,17 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public ApiResult<CategoryDTO> edit(CategoryEditDTO editDTO) {
 
+        log.info("edit category method called");
+
         if (editDTO == null || editDTO.getNameRu() == null
                 || editDTO.getNameUz() == null
-                || editDTO.getInstitutionId() == null || editDTO.getId() == null)
+                || editDTO.getInstitutionId() == null || editDTO.getId() == null) {
+            log.error("bad request in edit category");
             throw BadRequestException.builder()
                     .messageUz(ERROR_IN_REQUEST_UZ)
                     .messageRu(ERROR_IN_REQUEST_RU)
                     .build();
+        }
 
         User currentUser = getCurrentUser();
         Institution institution = institutionRepository
@@ -137,12 +150,14 @@ public class CategoryServiceImpl implements CategoryService {
                         .build());
 
         if (!currentUser.getRole().getName().equals("ADMIN"))
-            if (!institution.getManager().getId().equals(currentUser.getId()))
+            if (!institution.getManager().getId().equals(currentUser.getId())) {
+                log.error("You have no permission");
                 throw NotAllowedException
                         .builder()
                         .messageUz(YOU_HAVE_NO_PERMISSION_UZ)
                         .messageRu(YOU_HAVE_NO_PERMISSION_RU)
                         .build();
+            }
 
         Category editing = categoryRepository
                 .findById(editDTO.getId())
@@ -152,12 +167,13 @@ public class CategoryServiceImpl implements CategoryService {
                         .build());
 
         if (categoryRepository
-                .existsByNameUzOrNameRuAndIdIsNot(editDTO.getNameUz(), editDTO.getNameRu(), editing.getId()))
+                .existsByNameUzOrNameRuAndIdIsNot(editDTO.getNameUz(), editDTO.getNameRu(), editing.getId())) {
+            log.error("Category name already exists");
             throw AlreadyExistsException.builder()
                     .messageUz("Kategoriya nomi allaqachon mavjud")
                     .messageRu("Название категории уже существует")
                     .build();
-
+        }
         Category category = categoryMapper.fromEditDTO(editDTO, editing);
         category.setInstitution(institution);
         return ApiResult.successResponse(categoryMapper
@@ -165,6 +181,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     private User getCurrentUser() {
+        log.info("getCurrentUser called");
         String phoneNumber = CommonUtils.getCurrentUserPhoneNumber();
         if (phoneNumber != null)
             return userRepository
@@ -181,6 +198,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public ApiResult<List<CategoryDTO>> getAll() {
+        log.info("getAll called");
         return ApiResult.successResponse(
                 categoryMapper.toDTOList(
                         categoryRepository.findAll()
@@ -190,13 +208,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public ApiResult<List<CategoryInfoDTO>> getAllForInfo() {
+        log.info("getAllForInfo called");
         return ApiResult.successResponse(categoryRepository
                 .findAllForInfo());
     }
 
     @Override
     public ApiResult<List<CategoryInfoDTO>> getAllByInstitutionId(Long id) {
-
+        log.info("getAllByInstitutionId method called");
         if (id == null)
             throw BadRequestException.builder()
                     .messageUz("Id bo'sh bo'lishi mumkin emas")
@@ -209,7 +228,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public ApiResult<List<CategoryInfoDTO>> getAllByInstitutionIdAndPage(Long id, String page) {
-
+        log.info("getAllByInstitutionIdAndPage called");
         if (page == null || id == null)
             throw BadRequestException.builder()
                     .messageUz("Id yoki sahifa bo'sh bo'lishi mumkin emas")
@@ -226,7 +245,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public ApiResult<Void> delete(Long id) {
-
+        log.info("Deleting category with id " + id);
         if (id == null)
             throw BadRequestException.builder()
                     .messageUz("Id bo'sh bo'lishi mumkin emas")
@@ -238,6 +257,7 @@ public class CategoryServiceImpl implements CategoryService {
                     .messageUz("Kategoriya topilmadi")
                     .messageRu("категория не найдена")
                     .build();
+
         Long managerId = categoryRepository.findMangerIdByCategoryId(id);
         User currentUser = getCurrentUser();
 
