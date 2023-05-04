@@ -20,17 +20,17 @@ public class Address {
     private User user;
 
     private Integer houseNumber;
-    private String street;
-    private String city;
+    private Integer flat;
+    private Integer entrance;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinColumn(nullable = false)
     private Location location;
 
-    public Address(User user, Integer houseNumber, String street, String city) {
+    public Address(User user, Integer houseNumber, Integer flat, Integer entrance) {
         this.user = user;
         this.houseNumber = houseNumber;
-        this.street = street;
-        this.city = city;
+        this.flat = flat;
+        this.entrance = entrance;
     }
 }

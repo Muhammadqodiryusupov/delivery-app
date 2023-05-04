@@ -93,7 +93,7 @@ public class OrderServiceImpl implements OrderService {
 
         log.info("add order called with dto: " + dto);
         if (dto == null
-                || dto.getLocation() == null
+                || dto.getAddress() == null
                 || dto.getOrderProducts() == null
                 || dto.getOrderProducts().size() == 0)
             throw BadRequestException.builder()
@@ -121,6 +121,7 @@ public class OrderServiceImpl implements OrderService {
         order.setUser(user);
         order.setActive(true);
         order.setDeleted(false);
+        order.getAddress().setUser(user);
 
         Long productId = dto.getOrderProducts()
                 .stream()
@@ -204,7 +205,6 @@ public class OrderServiceImpl implements OrderService {
         return ApiResult.successResponse();
     }
 
-
     @Override
     public ApiResult<List<OrderDTO>> getAllByPage(String pagination) {
         log.info("getAllByPage called with pagination " + pagination);
@@ -220,7 +220,6 @@ public class OrderServiceImpl implements OrderService {
                 orderMapper.toDTOList(orderRepository
                         .findAll(PageRequest.of(page[0], page[1])).getContent()));
     }
-
 
     @Override
     public ApiResult<List<OrderDTO>> findAllBySort(SimpleSortRequest request) {
@@ -238,7 +237,6 @@ public class OrderServiceImpl implements OrderService {
                 .successResponse(orderMapper
                         .toDTOList(typedQuery.getResultList()));
     }
-
 
     @Override
     public ApiResult<List<OrderDTO>> getOrdersByStatus(String status, String pagination) {
@@ -258,7 +256,6 @@ public class OrderServiceImpl implements OrderService {
                                 .findAllByStatus(OrderStatus.valueOf(status),
                                         PageRequest.of(page[0], page[1])).getContent()));
     }
-
 
     @Override
     public ApiResult<List<OrderDTO>> getOrdersByUserId(UUID userid, String pagination) {

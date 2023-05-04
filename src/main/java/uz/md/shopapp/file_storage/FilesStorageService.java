@@ -19,4 +19,5 @@ public interface FilesStorageService {
 
     boolean delete(String fileURL);
 
+    String saveOrUpdate(MultipartFile image, String imageUrl);
 }

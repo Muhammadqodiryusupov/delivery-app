@@ -11,6 +11,7 @@ import uz.md.shopapp.dtos.ApiResult;
 import uz.md.shopapp.dtos.address.AddressAddDTO;
 import uz.md.shopapp.dtos.address.AddressDTO;
 import uz.md.shopapp.dtos.order.OrderDTO;
+import uz.md.shopapp.dtos.user.ClientEditDTO;
 import uz.md.shopapp.dtos.user.ClientMeDto;
 import uz.md.shopapp.exceptions.BadRequestException;
 import uz.md.shopapp.exceptions.NotAllowedException;
@@ -23,6 +24,7 @@ import uz.md.shopapp.repository.OrderRepository;
 import uz.md.shopapp.repository.UserRepository;
 import uz.md.shopapp.service.contract.ClientService;
 import uz.md.shopapp.utils.CommonUtils;
+import uz.md.shopapp.utils.MessageConstants;
 
 import java.util.List;
 
@@ -43,7 +45,6 @@ public class ClientServiceImpl implements ClientService {
     private final AddressRepository addressRepository;
     // endregion
 
-
     @Override
     public ApiResult<ClientMeDto> getMe() {
 
@@ -54,10 +55,11 @@ public class ClientServiceImpl implements ClientService {
         if (!user.getRole().getName().equals("CLIENT")) {
             log.error("User is not a client");
             throw NotAllowedException.builder()
-                    .messageUz("Siz client emassiz")
-                    .messageRu("")
+                    .messageUz(MessageConstants.YOU_RE_NOT_CLIENT_UZ)
+                    .messageRu(MessageConstants.YOU_RE_NOT_CLIENT_RU)
                     .build();
         }
+
         ClientMeDto clientMeDto = userMapper.toClientMeDTO(user);
         Long aLong = orderRepository
                 .countAllByUser_IdAndDeletedIsFalse(clientMeDto.getId());
@@ -72,8 +74,8 @@ public class ClientServiceImpl implements ClientService {
 
         if (!user.getRole().getName().equals("CLIENT"))
             throw NotAllowedException.builder()
-                    .messageUz("Siz client emassiz")
-                    .messageRu("")
+                    .messageUz(MessageConstants.YOU_RE_NOT_CLIENT_UZ)
+                    .messageRu(MessageConstants.YOU_RE_NOT_CLIENT_RU)
                     .build();
         return ApiResult
                 .successResponse(orderMapper
@@ -88,8 +90,8 @@ public class ClientServiceImpl implements ClientService {
 
         if (!user.getRole().getName().equals("CLIENT"))
             throw NotAllowedException.builder()
-                    .messageUz("Siz client emassiz")
-                    .messageRu("")
+                    .messageUz(MessageConstants.YOU_RE_NOT_CLIENT_UZ)
+                    .messageRu(MessageConstants.YOU_RE_NOT_CLIENT_RU)
                     .build();
 
         orderRepository.deleteAllByUserId(user.getId());
@@ -111,8 +113,8 @@ public class ClientServiceImpl implements ClientService {
 
         if (!user.getRole().getName().equals("CLIENT"))
             throw NotAllowedException.builder()
-                    .messageUz("Siz client emassiz")
-                    .messageRu("")
+                    .messageUz(MessageConstants.YOU_RE_NOT_CLIENT_UZ)
+                    .messageRu(MessageConstants.YOU_RE_NOT_CLIENT_RU)
                     .build();
 
         int[] pagination = CommonUtils.getPagination(page);
@@ -132,8 +134,8 @@ public class ClientServiceImpl implements ClientService {
 
         if (!user.getRole().getName().equals("CLIENT"))
             throw NotAllowedException.builder()
-                    .messageUz("Siz client emassiz")
-                    .messageRu("")
+                    .messageUz(MessageConstants.YOU_RE_NOT_CLIENT_UZ)
+                    .messageRu(MessageConstants.YOU_RE_NOT_CLIENT_RU)
                     .build();
 
         return ApiResult.successResponse(addressMapper
@@ -179,14 +181,14 @@ public class ClientServiceImpl implements ClientService {
         if (phoneNumber == null)
             throw NotFoundException.builder()
                     .messageUz(USER_NOT_FOUND_UZ)
-                    .messageRu(USER_NOT_ACTIVE_RU)
+                    .messageRu(USER_NOT_FOUND_RU)
                     .build();
 
         return userRepository
                 .findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> NotFoundException.builder()
                         .messageUz(USER_NOT_FOUND_UZ)
-                        .messageRu("")
+                        .messageRu(USER_NOT_FOUND_RU)
                         .build());
     }
 
@@ -204,5 +206,32 @@ public class ClientServiceImpl implements ClientService {
         }
         addressRepository.deleteById(id);
         return ApiResult.successResponse();
+    }
+
+    @Override
+    public ApiResult<ClientMeDto> edit(ClientEditDTO editDTO) {
+
+        log.info("client is editing");
+
+        User user = getCurrentUser();
+
+        if (!user.getRole().getName().equals("CLIENT")) {
+            log.error("User is not a client");
+            throw NotAllowedException.builder()
+                    .messageUz(MessageConstants.YOU_RE_NOT_CLIENT_UZ)
+                    .messageRu(MessageConstants.YOU_RE_NOT_CLIENT_RU)
+                    .build();
+        }
+
+        user.setFirstName(editDTO.getFirstName());
+        user.setLastName(editDTO.getLastName());
+
+        userRepository.save(user);
+
+        ClientMeDto clientMeDto = userMapper.toClientMeDTO(user);
+        Long numberOfOrders = orderRepository
+                .countAllByUser_IdAndDeletedIsFalse(user.getId());
+        clientMeDto.setNumberOfOrders(numberOfOrders);
+        return ApiResult.successResponse(clientMeDto);
     }
 }

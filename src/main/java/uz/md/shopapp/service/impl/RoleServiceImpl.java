@@ -1,5 +1,6 @@
 package uz.md.shopapp.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uz.md.shopapp.domain.Role;
 import uz.md.shopapp.dtos.ApiResult;
@@ -15,16 +16,11 @@ import uz.md.shopapp.service.contract.RoleService;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class RoleServiceImpl implements RoleService {
 
     private final RoleRepository roleRepository;
     private final RoleMapper roleMapper;
-
-    public RoleServiceImpl(RoleRepository roleRepository,
-                           RoleMapper roleMapper) {
-        this.roleRepository = roleRepository;
-        this.roleMapper = roleMapper;
-    }
 
     @Override
     public ApiResult<RoleDTO> add(RoleAddDTO dto) {

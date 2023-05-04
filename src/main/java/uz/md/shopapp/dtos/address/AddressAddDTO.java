@@ -15,11 +15,11 @@ public class AddressAddDTO {
     @NotNull(message = "Uy raqami kiritilishi shart")
     private Integer houseNumber;
 
-    @NotNull(message = "koçha kiritilishi shart")
-    private String street;
+    @NotNull(message = "Etaj kiritilishi shart")
+    private Integer flat;
 
-    @NotBlank(message = "Shahar kiritilishi shart")
-    private String city;
+    @NotBlank(message = "Podyezd kiritilishi shart")
+    private Integer entrance;
 
     private LocationDto location;
 

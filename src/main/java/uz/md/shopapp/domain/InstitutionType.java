@@ -25,6 +25,8 @@ public class InstitutionType extends AbsLongEntity {
     @Column(unique = true, nullable = false)
     private String nameRu;
 
+    private String imageUrl;
+
     private String descriptionUz;
 
     private String descriptionRu;

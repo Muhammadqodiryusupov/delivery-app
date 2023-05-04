@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import uz.md.shopapp.dtos.ApiResult;
 import uz.md.shopapp.service.contract.InstitutionService;
+import uz.md.shopapp.service.contract.InstitutionTypeService;
 import uz.md.shopapp.service.contract.ProductService;
 import uz.md.shopapp.utils.AppConstants;
 
@@ -16,6 +17,7 @@ public class FileUploadController {
     public static final String BASE_URL = AppConstants.BASE_URL + "images/upload";
 
     private final InstitutionService institutionService;
+    private final InstitutionTypeService institutionTypeService;
     private final ProductService productService;
 
     @PostMapping(value = "/to_institution/{id}", consumes = "multipart/form-data")
@@ -31,6 +33,14 @@ public class FileUploadController {
                                                 @PathVariable("id") Long productId) {
 
         return productService.setImage(productId, image);
+
+    }
+
+    @PostMapping(value = "/to_institution-type/{id}", consumes = "multipart/form-data")
+    public ApiResult<Void> uploadImageToInstitutionType(@RequestParam("file") MultipartFile image,
+                                                        @PathVariable("id") Long institutionTypeId) {
+
+        return institutionTypeService.setImage(institutionTypeId, image);
 
     }
 

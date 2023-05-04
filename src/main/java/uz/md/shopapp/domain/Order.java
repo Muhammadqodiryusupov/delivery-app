@@ -28,9 +28,9 @@ public class Order extends AbsLongEntity {
     @Enumerated(value = EnumType.STRING)
     private OrderStatus status = OrderStatus.PREPARING;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(nullable = false)
-    private Location location;
+    private Address address;
 
     @OneToMany(mappedBy = "order", fetch = FetchType.EAGER)
     private List<OrderProduct> orderProducts;

@@ -280,15 +280,12 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository
                 .findById(productId)
                 .orElseThrow(() -> NotFoundException.builder()
-                        .messageUz("PRODUCT NOT FOUND")
-                        .messageRu("")
+                        .messageUz("Mahsulot topilmadi")
+                        .messageRu("Товар не найден")
                         .build());
 
-        String savedFileURL = filesStorageService.save(image,
-                product.getNameUz() != null ? product.getNameUz() : image.getOriginalFilename());
-
-        if (product.getImageUrl() != null)
-            filesStorageService.delete(product.getImageUrl());
+        String savedFileURL = filesStorageService
+                .saveOrUpdate(image, product.getImageUrl());
 
         product.setImageUrl(savedFileURL);
         productRepository.save(product);

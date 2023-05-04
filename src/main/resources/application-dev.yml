@@ -51,7 +51,6 @@ application:
   bucket:
     name: birzumdaphotosbucket
 
-
 app:
   running: test
   admin:

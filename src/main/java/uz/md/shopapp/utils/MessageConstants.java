@@ -47,4 +47,7 @@ public interface MessageConstants {
     String ALREADY_EXISTED_PHONE_NUMBER_UZ = "Telefon raqam allaqachon mavjud";
     String ALREADY_EXISTED_PHONE_NUMBER_RU = "Номер телефона уже существует";
 
+    String YOU_RE_NOT_CLIENT_UZ = "Siz client emassiz";
+    String YOU_RE_NOT_CLIENT_RU = "Вы не клиент";
 }
+

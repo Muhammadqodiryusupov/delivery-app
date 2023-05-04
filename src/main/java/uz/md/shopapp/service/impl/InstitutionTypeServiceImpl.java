@@ -4,21 +4,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import uz.md.shopapp.domain.InstitutionType;
-import uz.md.shopapp.domain.User;
 import uz.md.shopapp.dtos.ApiResult;
 import uz.md.shopapp.dtos.institution_type.InstitutionTypeAddDTO;
 import uz.md.shopapp.dtos.institution_type.InstitutionTypeDTO;
 import uz.md.shopapp.dtos.institution_type.InstitutionTypeEditDTO;
 import uz.md.shopapp.exceptions.AlreadyExistsException;
 import uz.md.shopapp.exceptions.BadRequestException;
-import uz.md.shopapp.exceptions.NotAllowedException;
 import uz.md.shopapp.exceptions.NotFoundException;
+import uz.md.shopapp.file_storage.FilesStorageService;
 import uz.md.shopapp.mapper.InstitutionTypeMapper;
 import uz.md.shopapp.repository.InstitutionTypeRepository;
-import uz.md.shopapp.repository.UserRepository;
 import uz.md.shopapp.service.contract.InstitutionTypeService;
-import uz.md.shopapp.utils.CommonUtils;
 
 import java.util.List;
 
@@ -31,32 +29,12 @@ public class InstitutionTypeServiceImpl implements InstitutionTypeService {
 
     private final InstitutionTypeRepository institutionTypeRepository;
     private final InstitutionTypeMapper institutionTypeMapper;
-    private final UserRepository userRepository;
-
-    private void checkForPermission() {
-        User currentUser = getCurrentUser();
-        if (!currentUser.getRole().getName().equalsIgnoreCase("admin"))
-            throw NotAllowedException.builder()
-                    .messageUz("Kechirasiz sizda ruxsat yo'q")
-                    .messageRu("Извините, у вас нет разрешения")
-                    .build();
-    }
-
-    private User getCurrentUser() {
-        String phoneNumber = CommonUtils.getCurrentUserPhoneNumber();
-        return userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> NotFoundException.builder()
-                        .messageUz(USER_NOT_FOUND_UZ)
-                        .messageRu(USER_NOT_FOUND_RU)
-                        .build());
-    }
+    private final FilesStorageService filesStorageService;
 
     @Override
     public ApiResult<InstitutionTypeDTO> add(InstitutionTypeAddDTO dto) {
 
         log.info("Adding new InstitutionType");
-
-        checkForPermission();
 
         if (dto == null
                 || dto.getNameUz() == null
@@ -69,15 +47,16 @@ public class InstitutionTypeServiceImpl implements InstitutionTypeService {
         if (institutionTypeRepository
                 .existsByNameUzOrNameRu(dto.getNameUz(), dto.getNameRu()))
             throw AlreadyExistsException.builder()
-                    .messageUz("INSTITUTION_NAME_ALREADY_EXISTS")
-                    .messageRu("")
+                    .messageUz("Muassasa turi allaqachon mavjud")
+                    .messageRu("Тип объекта уже существует")
                     .build();
 
+        InstitutionType institutionType = institutionTypeMapper
+                .fromAddDTO(dto);
+        institutionTypeRepository.save(institutionType);
+
         return ApiResult
-                .successResponse(institutionTypeMapper
-                        .toDTO(institutionTypeRepository
-                                .save(institutionTypeMapper
-                                        .fromAddDTO(dto))));
+                .successResponse(institutionTypeMapper.toDTO(institutionType));
     }
 
     @Override
@@ -105,7 +84,6 @@ public class InstitutionTypeServiceImpl implements InstitutionTypeService {
 
         log.info("Editing InstitutionType");
 
-        checkForPermission();
 
         if (editDTO == null || editDTO.getId() == null
                 || editDTO.getNameUz() == null
@@ -166,11 +144,34 @@ public class InstitutionTypeServiceImpl implements InstitutionTypeService {
     }
 
     @Override
+    public ApiResult<Void> setImage(Long typeId, MultipartFile image) {
+        if (typeId == null || image == null)
+            throw BadRequestException.builder()
+                    .messageUz(ERROR_IN_REQUEST_UZ)
+                    .messageRu(ERROR_IN_REQUEST_RU)
+                    .build();
+
+        InstitutionType institutionType = institutionTypeRepository
+                .findById(typeId)
+                .orElseThrow(() -> NotFoundException.builder()
+                        .messageUz("Muassasa turi topilmadi")
+                        .messageRu("Тип institution не найден")
+                        .build());
+
+        String savedFileURL = filesStorageService
+                .saveOrUpdate(image, institutionType.getImageUrl());
+
+        institutionType.setImageUrl(savedFileURL);
+        institutionTypeRepository.save(institutionType);
+        return ApiResult.successResponse();
+    }
+
+    @Override
     public ApiResult<Void> delete(Long id) {
 
         log.info("deleting institutionType with id " + id);
 
-        checkForPermission();
+
         if (id == null)
             throw BadRequestException.builder()
                     .messageUz(ERROR_IN_REQUEST_UZ)

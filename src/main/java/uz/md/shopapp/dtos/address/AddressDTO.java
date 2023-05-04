@@ -12,8 +12,8 @@ import uz.md.shopapp.dtos.institution.LocationDto;
 public class AddressDTO {
     private Long id;
     private Integer houseNumber;
-    private String street;
-    private String city;
+    private Integer flat;
+    private Integer entrance;
     private Long userId;
     private LocationDto location;
 }

@@ -62,4 +62,12 @@ public class FilesStorageServiceImpl implements FilesStorageService {
         return true;
     }
 
+    @Override
+    public String saveOrUpdate(MultipartFile image, String previousImageURL) {
+        String savedImageURL  = save(image, image.getOriginalFilename());
+        if (previousImageURL != null)
+            delete(previousImageURL);
+        return savedImageURL;
+    }
+
 }

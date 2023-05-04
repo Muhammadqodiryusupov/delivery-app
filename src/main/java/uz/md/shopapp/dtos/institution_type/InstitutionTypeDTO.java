@@ -11,6 +11,7 @@ public class InstitutionTypeDTO {
     private Long id;
     private String nameUz;
     private String nameRu;
+    private String imageUrl;
     private String descriptionUz;
     private String descriptionRu;
 

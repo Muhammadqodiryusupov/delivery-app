@@ -4,14 +4,17 @@ import uz.md.shopapp.dtos.ApiResult;
 import uz.md.shopapp.dtos.address.AddressAddDTO;
 import uz.md.shopapp.dtos.address.AddressDTO;
 import uz.md.shopapp.dtos.order.OrderDTO;
+import uz.md.shopapp.dtos.user.ClientEditDTO;
 import uz.md.shopapp.dtos.user.ClientMeDto;
 
 import java.util.List;
 
 public interface ClientService {
+
     ApiResult<ClientMeDto> getMe();
 
     ApiResult<List<OrderDTO>> getMyOrders();
+
     ApiResult<Void> deleteMyOrders();
 
     ApiResult<List<OrderDTO>> getMyOrders(String page);
@@ -21,4 +24,6 @@ public interface ClientService {
     ApiResult<AddressDTO> addAddress(AddressAddDTO addressAddDTO);
 
     ApiResult<Void> delete(Long id);
+
+    ApiResult<ClientMeDto> edit(ClientEditDTO editDTO);
 }

@@ -1,5 +1,6 @@
 package uz.md.shopapp.service.contract;
 
+import org.springframework.web.multipart.MultipartFile;
 import uz.md.shopapp.dtos.ApiResult;
 import uz.md.shopapp.dtos.institution_type.InstitutionTypeAddDTO;
 import uz.md.shopapp.dtos.institution_type.InstitutionTypeDTO;
@@ -19,4 +20,7 @@ public interface InstitutionTypeService {
     ApiResult<List<InstitutionTypeDTO>> getAll();
 
     ApiResult<List<InstitutionTypeDTO>> getAllByPage(String page);
+
+    ApiResult<Void> setImage(Long typeId, MultipartFile image);
+
 }

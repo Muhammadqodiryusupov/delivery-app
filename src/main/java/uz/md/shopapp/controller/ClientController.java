@@ -6,10 +6,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import uz.md.shopapp.aop.annotation.CheckAuth;
+import uz.md.shopapp.domain.enums.PermissionEnum;
 import uz.md.shopapp.dtos.ApiResult;
 import uz.md.shopapp.dtos.address.AddressAddDTO;
 import uz.md.shopapp.dtos.address.AddressDTO;
 import uz.md.shopapp.dtos.order.OrderDTO;
+import uz.md.shopapp.dtos.user.ClientEditDTO;
 import uz.md.shopapp.dtos.user.ClientMeDto;
 import uz.md.shopapp.service.contract.ClientService;
 import uz.md.shopapp.utils.AppConstants;
@@ -68,5 +71,10 @@ public class ClientController {
         return clientService.delete(id);
     }
 
+    @Operation(description = "Editing a client")
+    @PostMapping("/edit")
+    public ApiResult<ClientMeDto> edit(@Valid @RequestBody ClientEditDTO editDTO) {
+        return clientService.edit(editDTO);
+    }
 
 }

@@ -218,13 +218,8 @@ public class InstitutionServiceImpl implements InstitutionService {
                         .messageRu(INSTITUTION_NOT_FOUND_RU)
                         .build());
 
-        String savedImageURL = filesStorageService.save(image,
-                institution.getNameUz() != null ? institution.getNameUz() : image.getOriginalFilename());
-
-        if (institution.getImageUrl() != null)
-            filesStorageService.delete(institution.getImageUrl());
-
-        institution.setImageUrl(savedImageURL);
+        String savedImageURl = filesStorageService.saveOrUpdate(image, institution.getImageUrl());
+        institution.setImageUrl(savedImageURl);
         institutionRepository.save(institution);
         return ApiResult.successResponse();
     }

@@ -36,8 +36,8 @@ public class Mock {
         return new Address(
                 manager,
                 15,
-                "street",
-                "city"
+                4,
+                2
         );
     }
 
