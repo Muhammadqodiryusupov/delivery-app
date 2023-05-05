@@ -79,12 +79,14 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("login client with {}", dto);
 
-        if (dto == null || dto.getPhoneNumber() == null || dto.getSmsCode() == null)
+        if (dto == null || dto.getPhoneNumber() == null || dto.getSmsCode() == null) {
+            log.info("Bad request");
             throw BadRequestException.builder()
                     .messageUz(ERROR_IN_REQUEST_UZ)
                     .messageRu(ERROR_IN_REQUEST_RU)
                     .build();
 
+        }
         log.info("Client login method called: " + dto);
 
         User user = authenticate(dto.getPhoneNumber(), dto.getSmsCode());
@@ -92,17 +94,20 @@ public class AuthServiceImpl implements AuthService {
         if (user == null
                 || user.getRole() == null
                 || !user.getRole().getName().equals("CLIENT")) {
+            log.info("User not found");
             throw NotFoundException.builder()
                     .messageUz(USER_NOT_FOUND_UZ)
                     .messageRu(USER_NOT_FOUND_RU)
                     .build();
         }
 
-        if (user.getCodeValidTill().isBefore(LocalDateTime.now()))
+        if (user.getCodeValidTill().isBefore(LocalDateTime.now())) {
+            log.info("User sms code is not valid");
             throw NotAllowedException.builder()
                     .messageUz(SMS_INVALID_UZ)
                     .messageRu(SMS_INVALID_RU)
                     .build();
+        }
 
         LocalDateTime tokenIssuedAt = LocalDateTime.now();
         String accessToken = jwtTokenProvider
@@ -118,31 +123,38 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("login employee dto: {}", dto);
 
-        if (dto == null || dto.getPhoneNumber() == null || dto.getPassword() == null)
+        if (dto == null || dto.getPhoneNumber() == null || dto.getPassword() == null) {
+            log.info("while login employee bad request");
             throw BadRequestException.builder()
                     .messageUz(ERROR_IN_REQUEST_UZ)
                     .messageRu(ERROR_IN_REQUEST_RU)
                     .build();
+        }
 
         log.info("Employee login method called: " + dto);
 
         User user = authenticate(dto.getPhoneNumber(), dto.getPassword());
 
-        if (user == null || user.getRole() == null || !user.getRole().getName().equals("MANAGER"))
+        if (user == null || user.getRole() == null ||
+                !(user.getRole().getName().equals("MANAGER") || user.getRole().getName().equals("ADMIN"))) {
+            log.info("Employee not found");
             throw NotFoundException.builder()
                     .messageUz(EMPLOYEE_NOT_FOUND_UZ)
                     .messageRu(EMPLOYEE_NOT_FOUND_RU)
                     .build();
+        }
 
         LocalDateTime tokenIssuedAt = LocalDateTime.now();
         String accessToken = jwtTokenProvider.generateAccessToken(user,
                 Timestamp.valueOf(tokenIssuedAt));
 
-        if (accessToken == null)
+        if (accessToken == null) {
+            log.info("Access token is null");
             throw IllegalRequestException.builder()
                     .messageUz(TOKEN_CREATION_ERROR_UZ)
                     .messageRu(TOKEN_CREATION_ERROR_RU)
                     .build();
+        }
 
         TokenDTO tokenDTO = new TokenDTO(accessToken);
 
@@ -156,17 +168,20 @@ public class AuthServiceImpl implements AuthService {
         log.info("Employee registration with {}", dto);
 
         if (dto == null || dto.getPhoneNumber() == null) {
+            log.info("Bad request while Employee registration");
             throw BadRequestException.builder()
                     .messageUz(ERROR_IN_REQUEST_UZ)
                     .messageRu(ERROR_IN_REQUEST_RU)
                     .build();
         }
 
-        if (userRepository.existsByPhoneNumber(dto.getPhoneNumber()))
+        if (userRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
+            log.info("User not found with this phone number " + dto.getPhoneNumber());
             throw ConflictException.builder()
                     .messageUz(ALREADY_EXISTED_PHONE_NUMBER_UZ)
                     .messageRu(ALREADY_EXISTED_PHONE_NUMBER_RU)
                     .build();
+        }
 
         User user = userMapper.fromEmployeeAddDTO(dto);
         Role role;
@@ -179,14 +194,15 @@ public class AuthServiceImpl implements AuthService {
                             .messageRu(ROLE_NOT_FOUND_RU)
                             .build()
                     );
-        else
+        else {
+            log.info("Role not set by default for user set manager role");
             role = roleRepository.findByName("MANAGER")
                     .orElseThrow(() -> NotFoundException
                             .builder()
                             .messageUz(ROLE_NOT_FOUND_UZ)
                             .messageRu(ROLE_NOT_FOUND_RU)
                             .build());
-
+        }
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setActive(true);
         user.setRole(role);
@@ -196,13 +212,18 @@ public class AuthServiceImpl implements AuthService {
 
     private User authenticate(String phoneNumber, String password) {
 
-        if (phoneNumber == null || password == null)
+        log.info("User is authenticating with " + phoneNumber + " : ");
+
+        if (phoneNumber == null || password == null) {
+            log.info("Bad request phoneNumber or password is null");
             throw BadRequestException.builder()
                     .messageUz(ERROR_IN_REQUEST_UZ)
                     .messageRu(ERROR_IN_REQUEST_RU)
                     .build();
+        }
 
         try {
+            log.info("Authenticating ...");
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             phoneNumber,
@@ -234,17 +255,20 @@ public class AuthServiceImpl implements AuthService {
         log.info("User registration with " + phoneNumber);
 
         if (phoneNumber == null) {
+            log.info("Phone number is null");
             throw BadRequestException.builder()
                     .messageUz("Telefon raqam bo'sh bo'lishi mumkin emas")
                     .messageRu("Номер телефона не может быть пустым")
                     .build();
         }
 
-        if (userRepository.existsByPhoneNumber(phoneNumber))
+        if (userRepository.existsByPhoneNumber(phoneNumber)) {
+            log.info("Phone number is already registered");
             throw ConflictException.builder()
                     .messageUz("Telefon raqam allaqachon mavjud")
                     .messageRu("Номер телефона уже существует")
                     .build();
+        }
 
         User user = new User();
         user.setPhoneNumber(phoneNumber);
@@ -263,12 +287,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ApiResult<String> getSMSCode(String phoneNumber) {
-
-        if (phoneNumber == null)
+        log.info("getSMSCode method called with phone number: " + phoneNumber);
+        if (phoneNumber == null) {
+            log.info("Phone number is null");
             throw BadRequestException.builder()
                     .messageUz("Telefon raqam bo'sh bo'lishi mumkin emas")
                     .messageRu("Номер телефона не может быть пустым")
                     .build();
+        }
 
         if (!userRepository
                 .existsByPhoneNumber(phoneNumber))
@@ -289,14 +315,12 @@ public class AuthServiceImpl implements AuthService {
 
         String smsCode = RandomStringUtils.random(5, false, true);
 
-        System.out.println("=========== smsCode  " + smsCode + " =============== ");
+        log.info("=========== smsCode  {}  =============== " + smsCode);
 
         user.setPassword(passwordEncoder.encode(smsCode));
         user.setCodeValidTill(LocalDateTime.now().plus(smsValidTill, ChronoUnit.valueOf(smsValidTillIn)));
 
-        SendRequest sendRequest =
-                new SendRequest(
-                        user.getPhoneNumber().substring(1),
+        SendRequest sendRequest = new SendRequest(user.getPhoneNumber().substring(1),
                         "" + smsCode + "-code:birzumda.uz",
                         4546,
                         "http://localhost:8090/" + AuthController.BASE_URL + "/client/sign-in");

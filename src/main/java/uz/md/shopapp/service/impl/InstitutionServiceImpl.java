@@ -63,11 +63,13 @@ public class InstitutionServiceImpl implements InstitutionService {
                     .build();
         }
 
-        if (institutionRepository.existsByNameUzOrNameRu(dto.getNameUz(), dto.getNameRu()))
+        if (institutionRepository.existsByNameUzOrNameRu(dto.getNameUz(), dto.getNameRu())) {
+            log.info("Institution name already exists");
             throw AlreadyExistsException.builder()
                     .messageUz("Muassasa nomi allaqachon mavjud")
                     .messageRu("название учреждения уже существует")
                     .build();
+        }
 
         Institution institution = institutionMapper
                 .fromAddDTO(dto);
@@ -88,11 +90,13 @@ public class InstitutionServiceImpl implements InstitutionService {
                         .messageRu("Контроллер не найден")
                         .build());
 
-        if (!manager.getRole().getName().equals("MANAGER"))
+        if (!manager.getRole().getName().equals("MANAGER")) {
+            log.info("not allowed to access coz you are not manager");
             throw NotAllowedException.builder()
                     .messageUz("Ushbu " + dto.getManagerId() + " IDli foydalanuvchi manejer emas")
                     .messageRu("Пользователь с идентификатором " + dto.getManagerId() + " не является менеджером")
                     .build();
+        }
 
         institution.setManager(manager);
         return ApiResult
@@ -103,6 +107,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public ApiResult<InstitutionDTO> findById(Long id) {
+        log.info("findById called");
         if (id == null)
             throw BadRequestException.builder()
                     .messageUz(ERROR_IN_REQUEST_UZ)

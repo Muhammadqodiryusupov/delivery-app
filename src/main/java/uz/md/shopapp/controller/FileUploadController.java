@@ -23,25 +23,19 @@ public class FileUploadController {
     @PostMapping(value = "/to_institution/{id}", consumes = "multipart/form-data")
     public ApiResult<Void> uploadImageToInstitution(@RequestParam("file") MultipartFile image,
                                                     @PathVariable("id") Long institutionId) {
-
         return institutionService.setImage(institutionId, image);
-
     }
 
     @PostMapping(value = "/to_product/{id}", consumes = "multipart/form-data")
     public ApiResult<Void> uploadImageToProduct(@RequestParam("file") MultipartFile image,
                                                 @PathVariable("id") Long productId) {
-
         return productService.setImage(productId, image);
-
     }
 
     @PostMapping(value = "/to_institution-type/{id}", consumes = "multipart/form-data")
     public ApiResult<Void> uploadImageToInstitutionType(@RequestParam("file") MultipartFile image,
                                                         @PathVariable("id") Long institutionTypeId) {
-
         return institutionTypeService.setImage(institutionTypeId, image);
-
     }
 
 

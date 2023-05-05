@@ -181,6 +181,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     private User getCurrentUser() {
+
         log.info("getCurrentUser called");
         String phoneNumber = CommonUtils.getCurrentUserPhoneNumber();
         if (phoneNumber != null)

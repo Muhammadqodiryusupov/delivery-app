@@ -111,11 +111,13 @@ public class ClientServiceImpl implements ClientService {
 
         User user = getCurrentUser();
 
-        if (!user.getRole().getName().equals("CLIENT"))
+        if (!user.getRole().getName().equals("CLIENT")) {
+            log.info("You are not allowed coz you are not client");
             throw NotAllowedException.builder()
                     .messageUz(MessageConstants.YOU_RE_NOT_CLIENT_UZ)
                     .messageRu(MessageConstants.YOU_RE_NOT_CLIENT_RU)
                     .build();
+        }
 
         int[] pagination = CommonUtils.getPagination(page);
         return ApiResult.successResponse(orderMapper
