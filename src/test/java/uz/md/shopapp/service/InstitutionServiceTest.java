@@ -111,8 +111,7 @@ public class InstitutionServiceTest {
                 ADDING_DESCRIPTION_UZ,
                 ADDING_DESCRIPTION_RU,
                 new LocationDto(15.0, 15.0),
-                institutionType.getId(),
-                manager.getId()
+                institutionType.getId()
         );
 
         ApiResult<InstitutionDTO> add = institutionService.add(addDTO);
@@ -134,8 +133,7 @@ public class InstitutionServiceTest {
                 ADDING_DESCRIPTION_UZ,
                 ADDING_DESCRIPTION_RU,
                 new LocationDto(15.0, 15.0),
-                institutionType.getId(),
-                manager.getId());
+                institutionType.getId());
 
         assertThrows(AlreadyExistsException.class, () -> institutionService.add(addDTO));
     }
@@ -169,8 +167,7 @@ public class InstitutionServiceTest {
                 ADDING_DESCRIPTION_RU,
                 institution.getId(),
                 new LocationDto(15.0, 15.0),
-                institutionType.getId(),
-                manager.getId());
+                institutionType.getId());
 
         ApiResult<InstitutionDTO> edit = institutionService.edit(editDTO);
 
@@ -192,8 +189,7 @@ public class InstitutionServiceTest {
                 ADDING_DESCRIPTION_RU,
                 15L,
                 new LocationDto(15.0, 15.0),
-                institutionType.getId(),
-                manager.getId());
+                institutionType.getId());
 
         assertThrows(NotFoundException.class, () -> institutionService.edit(editDTO));
 
@@ -221,8 +217,7 @@ public class InstitutionServiceTest {
                 ADDING_DESCRIPTION_RU,
                 institution.getId(),
                 new LocationDto(15.0, 15.0),
-                institutionType.getId(),
-                manager.getId());
+                institutionType.getId());
 
         assertThrows(AlreadyExistsException.class, () -> institutionService.edit(editDTO));
 
