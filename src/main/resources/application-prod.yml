@@ -50,7 +50,7 @@ application:
 
 
 app:
-  running: test
+  simulation: false
   admin:
     firstName: "MuhammadQodir"
     lastName: "Yusupov"

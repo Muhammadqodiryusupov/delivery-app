@@ -3,9 +3,11 @@ package uz.md.shopapp.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import uz.md.shopapp.dtos.ApiResult;
 import uz.md.shopapp.dtos.TokenDTO;
@@ -20,6 +22,7 @@ import uz.md.shopapp.utils.AppConstants;
 @RequiredArgsConstructor
 @Tag(name = "Auth", description = "Endpoints for Auth")
 @Slf4j
+@Validated
 public class AuthController {
 
     /**
@@ -37,8 +40,11 @@ public class AuthController {
     }
 
     @Operation(description = " get sms code")
-    @PostMapping(value = "get/sms-code")
-    ApiResult<String> getSmsCode( @RequestParam String phoneNumber) {
+    @PostMapping(value = "/get/sms-code")
+    ApiResult<String> getSmsCode(
+            @RequestParam
+            @Pattern(regexp = AppConstants.PHONE_NUMBER_REGEX, message = "Phone number must be a 10-digit number")
+            String phoneNumber) {
         log.info("Request body: {}", phoneNumber);
         return authService.getSMSCode(phoneNumber);
     }

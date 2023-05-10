@@ -2,29 +2,59 @@ package uz.md.shopapp.util;
 
 import com.github.javafaker.Faker;
 import com.github.javafaker.Name;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 import org.testcontainers.shaded.org.apache.commons.lang3.RandomUtils;
 import uz.md.shopapp.domain.*;
 import uz.md.shopapp.domain.enums.PermissionEnum;
+import uz.md.shopapp.repository.InstitutionTypeRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-public class Mock {
+@Component
+public class MockDataGenerator {
 
-    private static final Faker faker = new Faker();
+    private final Faker FAKER = new Faker();
+    @Autowired
+    private InstitutionTypeRepository institutionTypeRepository;
 
-    public static InstitutionType getInstitutionType() {
-        long l = RandomUtils.nextLong(1, 100);
-        return new InstitutionType(
-                "Restaurant" + l,
-                "Restaurant" + l,
-                " All restaurants " + l,
-                " All restaurants " + l);
+    public InstitutionType getInstitutionTypeSaved() {
+        return institutionTypeRepository.save(getInstitutionType());
     }
 
-    public static User getUser(Role role) {
+    public InstitutionType getInstitutionType() {
+        long l = RandomUtils.nextLong(1, 100);
+        return getInstitutionType(l);
+    }
+
+    public InstitutionType getInstitutionType(long index) {
+        return new InstitutionType(
+                "Restaurant " + index,
+                "Restaurant " + index,
+                " All restaurants " + index,
+                " All restaurants " + index);
+    }
+
+    public List<InstitutionType> getInstitutionTypes(int count) {
+        return IntStream.range(0, count)
+                .mapToObj(operand -> getInstitutionType())
+                .collect(Collectors.toList());
+    }
+
+    public List<InstitutionType> getInstitutionTypesSaved(int count) {
+        return institutionTypeRepository.saveAll(IntStream.range(0, count)
+                .mapToObj(this::getInstitutionType)
+                .collect(Collectors.toList()));
+    }
+
+
+    public User getUser(Role role) {
         return new User(
                 "Ali",
                 "Yusupov",
@@ -32,7 +62,7 @@ public class Mock {
                 role);
     }
 
-    public static Address getAddress(User manager) {
+    public Address getAddress(User manager) {
         return new Address(
                 manager,
                 15,
@@ -41,7 +71,7 @@ public class Mock {
         );
     }
 
-    public static Institution getInstitution(Location location, InstitutionType institutionType, User manager) {
+    public Institution getInstitution(Location location, InstitutionType institutionType, User manager) {
         return new Institution(
                 "Max Way",
                 "Max Way",
@@ -54,7 +84,7 @@ public class Mock {
                 manager);
     }
 
-    public static Category getCategory(Institution institution) {
+    public Category getCategory(Institution institution) {
         Category category = new Category();
         category.setNameUz("Uzbek meals");
         category.setNameRu("Uzbek meals");
@@ -66,16 +96,16 @@ public class Mock {
         return category;
     }
 
-    public static Location getLocation() {
+    public Location getLocation() {
         long la = RandomUtils.nextLong(15, 100);
         long lo = RandomUtils.nextLong(15, 100);
         return new Location((double) la, (double) lo);
     }
 
-    public static Product getProduct(Category category) {
+    public Product getProduct(Category category) {
         Random random = new Random();
         long price = random.nextLong() * 300 + 200;
-        int v = random.nextInt(5)+1;
+        int v = random.nextInt(5) + 1;
         Product product = new Product();
         product.setNameUz("Plov " + v);
         product.setNameRu("Plov " + v);
@@ -88,7 +118,7 @@ public class Mock {
         return product;
     }
 
-    private static Role getAdminRole() {
+    private Role getAdminRole() {
         return Role.builder()
                 .name("ADMIN")
                 .description("admin description")
@@ -96,15 +126,15 @@ public class Mock {
                 .build();
     }
 
-    public static User getMockEmployee() {
+    public User getMockEmployee() {
         Role adminRole = getAdminRole();
         User user = getUser();
         user.setRole(adminRole);
         return user;
     }
 
-    private static User getUser() {
-        Name name = faker.name();
+    private User getUser() {
+        Name name = FAKER.name();
         String phoneNumber = "+99893" + RandomStringUtils.random(7, false, true);
         String password = RandomStringUtils.random(5, false, true);
         return User.builder()
@@ -115,7 +145,7 @@ public class Mock {
                 .build();
     }
 
-    public static User getMockClient() {
+    public User getMockClient() {
         Role clientRole = getClientRole();
         User user = getUser();
         user.setRole(clientRole);
@@ -123,7 +153,7 @@ public class Mock {
         return user;
     }
 
-    private static Role getClientRole() {
+    private Role getClientRole() {
         return Role.builder()
                 .name("CLIENT")
                 .description("client description")
@@ -131,7 +161,7 @@ public class Mock {
                 .build();
     }
 
-    public static Institution getInstitution() {
+    public Institution getInstitution() {
         String random = RandomStringUtils.random(5, true, false);
         Location location = getLocation();
         InstitutionType institutionType = getInstitutionType();

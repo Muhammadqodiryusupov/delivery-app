@@ -20,7 +20,7 @@ import uz.md.shopapp.repository.InstitutionTypeRepository;
 import uz.md.shopapp.repository.RoleRepository;
 import uz.md.shopapp.repository.UserRepository;
 import uz.md.shopapp.service.contract.InstitutionTypeService;
-import uz.md.shopapp.util.Mock;
+import uz.md.shopapp.util.MockDataGenerator;
 import uz.md.shopapp.util.TestUtil;
 
 import java.util.List;
@@ -45,6 +45,9 @@ public class InstitutionTypeServiceTest {
     private InstitutionTypeService institutionTypeService;
 
     @Autowired
+    private MockDataGenerator mockDataGenerator;
+
+    @Autowired
     private InstitutionTypeRepository institutionTypeRepository;
     @Autowired
     private RoleRepository roleRepository;
@@ -55,11 +58,11 @@ public class InstitutionTypeServiceTest {
 
     @BeforeEach
     void setup() {
-        institutionType = Mock.getInstitutionType();
+        institutionType = mockDataGenerator.getInstitutionType();
     }
 
     public void addManager(){
-        manager = Mock.getMockEmployee();
+        manager = mockDataGenerator.getMockEmployee();
         manager.setPhoneNumber("+998941001010");
         manager.setPassword("123");
         Optional<Role> roleOptional = roleRepository.findByName(manager.getRole().getName());

@@ -21,7 +21,7 @@ import uz.md.shopapp.exceptions.NotAllowedException;
 import uz.md.shopapp.exceptions.NotFoundException;
 import uz.md.shopapp.repository.*;
 import uz.md.shopapp.service.contract.ProductService;
-import uz.md.shopapp.util.Mock;
+import uz.md.shopapp.util.MockDataGenerator;
 import uz.md.shopapp.util.TestUtil;
 
 import java.util.ArrayList;
@@ -62,23 +62,24 @@ public class ProductServiceTest {
     private UserRepository userRepository;
     @Autowired
     private InstitutionRepository institutionRepository;
-
+    @Autowired
+    private MockDataGenerator mockDataGenerator;
 
     @BeforeEach
     public void init() {
         setupManager();
         setupInstitution();
         setupCategory();
-        product = Mock.getProduct(category);
+        product = mockDataGenerator.getProduct(category);
         productRepository.deleteAll();
     }
 
     private void setupInstitution() {
-        Location location = Mock.getLocation();
+        Location location = mockDataGenerator.getLocation();
         locationRepository.saveAndFlush(location);
-        InstitutionType institutionType = Mock.getInstitutionType();
+        InstitutionType institutionType = mockDataGenerator.getInstitutionType();
         institutionTypeRepository.saveAndFlush(institutionType);
-        institution = Mock.getInstitution(location, institutionType, manager);
+        institution = mockDataGenerator.getInstitution(location, institutionType, manager);
         institutionRepository.saveAndFlush(institution);
     }
 
@@ -98,7 +99,7 @@ public class ProductServiceTest {
 
     private void setupCategory() {
         categoryRepository.deleteAll();
-        category = Mock.getCategory(institution);
+        category = mockDataGenerator.getCategory(institution);
         categoryRepository.save(category);
     }
 
@@ -232,7 +233,7 @@ public class ProductServiceTest {
                         "123",
                         roleRepository
                                 .findByName("MANAGER")
-                                .orElseThrow(() ->NotFoundException.builder()
+                                .orElseThrow(() -> NotFoundException.builder()
                                         .messageUz("MANAGER ROLE NOT FOUND")
                                         .messageRu("")
                                         .build())

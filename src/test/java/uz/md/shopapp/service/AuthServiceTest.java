@@ -21,7 +21,7 @@ import uz.md.shopapp.exceptions.NotEnabledException;
 import uz.md.shopapp.repository.RoleRepository;
 import uz.md.shopapp.repository.UserRepository;
 import uz.md.shopapp.service.contract.AuthService;
-import uz.md.shopapp.util.Mock;
+import uz.md.shopapp.util.MockDataGenerator;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -42,6 +42,9 @@ public class AuthServiceTest {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private MockDataGenerator mockDataGenerator;
+
     private User client;
     private User employee;
 
@@ -51,7 +54,7 @@ public class AuthServiceTest {
 
     @BeforeEach
     public void init() {
-        client = Mock.getMockClient();
+        client = mockDataGenerator.getMockClient();
 
         Optional<Role> clientRole = roleRepository.findByName(client.getRole().getName());
         if (clientRole.isPresent())
@@ -59,7 +62,7 @@ public class AuthServiceTest {
         else
             client.setRole(roleRepository.saveAndFlush(client.getRole()));
 
-        employee = Mock.getMockEmployee();
+        employee = mockDataGenerator.getMockEmployee();
         Optional<Role> employeeRole = roleRepository.findByName(employee.getRole().getName());
         if (employeeRole.isPresent())
             employee.setRole(employeeRole.get());

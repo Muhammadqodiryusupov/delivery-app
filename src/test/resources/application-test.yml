@@ -32,8 +32,24 @@ jwt:
     key: evjrkhertvuheruth84y574y587yvbrhvjrtvhrjthv3u4895vuntervnjtkejrht89545y
     expiration-time: 604800000
 
+
+# AWS S3 credentials
+
+cloud:
+  aws:
+    credentials:
+      access_key: AKIAU5RMQJADOUFAXWSK
+      secret_key: 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
+    region:
+      static: us-east-2
+    stack:
+      auto: false
+    s3:
+      base_url: https://birzumdaphotosbucket.s3.us-east-2.amazonaws.com/
+
+
 app:
-  running: test
+  simulation: true
   admin:
     firstName: "MuhammadQodir"
     lastName: "Yusupov"

@@ -21,7 +21,7 @@ import uz.md.shopapp.exceptions.AlreadyExistsException;
 import uz.md.shopapp.exceptions.NotFoundException;
 import uz.md.shopapp.repository.*;
 import uz.md.shopapp.service.contract.CategoryService;
-import uz.md.shopapp.util.Mock;
+import uz.md.shopapp.util.MockDataGenerator;
 import uz.md.shopapp.util.TestUtil;
 
 import java.util.ArrayList;
@@ -40,6 +40,9 @@ public class CategoryServiceTest {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private MockDataGenerator mockDataGenerator;
 
     private Category category;
 
@@ -73,7 +76,7 @@ public class CategoryServiceTest {
                 .password(passwordEncoder.encode("123"))
                 .build();
 
-        institution = Mock.getInstitution();
+        institution = mockDataGenerator.getInstitution();
         institutionType = institution.getType();
 
         userRepository.save(manager);
@@ -81,7 +84,7 @@ public class CategoryServiceTest {
         locationRepository.saveAndFlush(institution.getLocation());
         institutionTypeRepository.saveAndFlush(institution.getType());
         institutionRepository.saveAndFlush(institution);
-        category = Mock.getCategory(institution);
+        category = mockDataGenerator.getCategory(institution);
         categoryRepository.deleteAll();
     }
 

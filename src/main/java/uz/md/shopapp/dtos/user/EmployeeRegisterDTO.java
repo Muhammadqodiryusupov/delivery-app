@@ -2,10 +2,12 @@ package uz.md.shopapp.dtos.user;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import uz.md.shopapp.utils.AppConstants;
 
 
 @AllArgsConstructor
@@ -20,6 +22,7 @@ public class EmployeeRegisterDTO {
     private String lastName;
 
     @NotBlank(message = "Phone Number cannot be blank")
+    @Pattern(regexp = AppConstants.PHONE_NUMBER_REGEX)
     private String phoneNumber;
 
     @NotBlank(message = "Password cannot be blank")

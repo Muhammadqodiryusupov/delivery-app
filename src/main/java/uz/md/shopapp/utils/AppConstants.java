@@ -60,7 +60,7 @@ public interface AppConstants {
     /**
      * Regexes
      */
-    String PhoneNumber_REGEX = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
+    String PHONE_NUMBER_REGEX = "\\+998\\d{9}";
     String PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
 
     /**

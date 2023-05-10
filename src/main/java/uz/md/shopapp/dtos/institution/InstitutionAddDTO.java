@@ -25,6 +25,4 @@ public class InstitutionAddDTO {
 
     @NotNull(message = "Institution type id must not be null")
     private Long institutionTypeId;
-    @NotNull(message = "Institution manager id must not be null")
-    private Long managerId;
 }

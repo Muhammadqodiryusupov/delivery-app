@@ -18,7 +18,7 @@ import uz.md.shopapp.exceptions.AlreadyExistsException;
 import uz.md.shopapp.exceptions.NotFoundException;
 import uz.md.shopapp.repository.*;
 import uz.md.shopapp.service.contract.InstitutionService;
-import uz.md.shopapp.util.Mock;
+import uz.md.shopapp.util.MockDataGenerator;
 import uz.md.shopapp.util.TestUtil;
 
 import java.io.FileInputStream;
@@ -33,6 +33,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @Transactional
 public class InstitutionServiceTest {
+
+    @Autowired
+    private MockDataGenerator mockDataGenerator;
 
     @Value("${app.images.institutions.root.path}")
     private String rootPathUrl;
@@ -78,11 +81,11 @@ public class InstitutionServiceTest {
         setupType();
         setupManager();
         setupLocation();
-        institution = Mock.getInstitution(location, institutionType, manager);
+        institution = mockDataGenerator.getInstitution(location, institutionType, manager);
     }
 
     private void setupLocation() {
-        location = Mock.getLocation();
+        location = mockDataGenerator.getLocation();
         locationRepository.saveAndFlush(location);
     }
 
@@ -90,12 +93,12 @@ public class InstitutionServiceTest {
         Role role = roleRepository
                 .findByName("MANAGER")
                 .orElseThrow(() -> new NotFoundException("ROLE NOT FOUND", ""));
-        manager = Mock.getUser(role);
+        manager = mockDataGenerator.getUser(role);
         userRepository.save(manager);
     }
 
     private void setupType() {
-        institutionType = Mock.getInstitutionType();
+        institutionType = mockDataGenerator.getInstitutionType();
         institutionTypeRepository.saveAndFlush(institutionType);
     }
 
@@ -204,7 +207,7 @@ public class InstitutionServiceTest {
                 "description",
                 "description",
                 null,
-                locationRepository.saveAndFlush(Mock.getLocation()),
+                locationRepository.saveAndFlush(mockDataGenerator.getLocation()),
                 institutionType,
                 null,
                 manager));

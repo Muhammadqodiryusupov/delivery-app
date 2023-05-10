@@ -26,6 +26,7 @@ import uz.md.shopapp.repository.InstitutionTypeRepository;
 import uz.md.shopapp.repository.LocationRepository;
 import uz.md.shopapp.repository.UserRepository;
 import uz.md.shopapp.service.contract.InstitutionService;
+import uz.md.shopapp.utils.CommonUtils;
 
 import java.util.List;
 
@@ -54,8 +55,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         if (dto == null
                 || dto.getNameUz() == null
                 || dto.getNameRu() == null
-                || dto.getInstitutionTypeId() == null
-                || dto.getManagerId() == null) {
+                || dto.getInstitutionTypeId() == null) {
             log.info("Bad request");
             throw BadRequestException.builder()
                     .messageUz(ERROR_IN_REQUEST_UZ)
@@ -83,18 +83,18 @@ public class InstitutionServiceImpl implements InstitutionService {
 
         locationRepository.saveAndFlush(institution.getLocation());
 
-        User manager = userRepository
-                .findById(dto.getManagerId())
+        String userPhoneNumber = CommonUtils.getCurrentUserPhoneNumber();
+        User manager = userRepository.findByPhoneNumber(userPhoneNumber)
                 .orElseThrow(() -> NotFoundException.builder()
                         .messageUz("Menejer topilmadi")
-                        .messageRu("Контроллер не найден")
+                        .messageRu("Менеджер не найден")
                         .build());
 
         if (!manager.getRole().getName().equals("MANAGER")) {
             log.info("not allowed to access coz you are not manager");
             throw NotAllowedException.builder()
-                    .messageUz("Ushbu " + dto.getManagerId() + " IDli foydalanuvchi manejer emas")
-                    .messageRu("Пользователь с идентификатором " + dto.getManagerId() + " не является менеджером")
+                    .messageUz("Ushbu " + manager.getId() + " IDli foydalanuvchi manejer emas")
+                    .messageRu("Пользователь с идентификатором " + manager.getId() + " не является менеджером")
                     .build();
         }
 
@@ -131,8 +131,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                 || editDTO.getId() == null
                 || editDTO.getNameRu() == null
                 || editDTO.getLocation() == null
-                || editDTO.getInstitutionTypeId() == null
-                || editDTO.getManagerId() == null)
+                || editDTO.getInstitutionTypeId() == null)
             throw BadRequestException.builder()
                     .messageRu(ERROR_IN_REQUEST_RU)
                     .messageUz(ERROR_IN_REQUEST_UZ)

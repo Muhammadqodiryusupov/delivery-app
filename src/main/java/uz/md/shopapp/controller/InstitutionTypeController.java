@@ -39,7 +39,6 @@ public class InstitutionTypeController {
     @Operation(description = "Get all institutionTypes")
     public ApiResult<List<InstitutionTypeDTO>> getAllByPage(@PathVariable String page) {
         log.info("Getting all institutionTypes");
-
         return institutionTypeService.getAllByPage(page);
     }
 

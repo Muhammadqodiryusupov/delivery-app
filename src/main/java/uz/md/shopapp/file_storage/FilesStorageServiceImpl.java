@@ -4,15 +4,13 @@ import com.amazonaws.services.s3.AmazonS3;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import uz.md.shopapp.exceptions.BadRequestException;
 import uz.md.shopapp.file_storage.utils.FileStorageUtils;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Objects;
 
 import static uz.md.shopapp.utils.MessageConstants.ERROR_IN_REQUEST_RU;
 import static uz.md.shopapp.utils.MessageConstants.ERROR_IN_REQUEST_UZ;
@@ -20,6 +18,7 @@ import static uz.md.shopapp.utils.MessageConstants.ERROR_IN_REQUEST_UZ;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(prefix = "app", name = "simulation", havingValue = "false")
 public class FilesStorageServiceImpl implements FilesStorageService {
 
     @Value("${application.bucket.name}")
@@ -64,7 +63,7 @@ public class FilesStorageServiceImpl implements FilesStorageService {
 
     @Override
     public String saveOrUpdate(MultipartFile image, String previousImageURL) {
-        String savedImageURL  = save(image, image.getOriginalFilename());
+        String savedImageURL = save(image, image.getOriginalFilename());
         if (previousImageURL != null)
             delete(previousImageURL);
         return savedImageURL;

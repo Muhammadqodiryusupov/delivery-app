@@ -14,6 +14,4 @@ public class InstitutionTypeDTO {
     private String imageUrl;
     private String descriptionUz;
     private String descriptionRu;
-
-
 }

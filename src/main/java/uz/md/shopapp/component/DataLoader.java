@@ -22,7 +22,7 @@ import static uz.md.shopapp.domain.enums.PermissionEnum.*;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Profile(value = {"test"})
+@Profile(value = {"!test"})
 public class DataLoader implements CommandLineRunner {
 
     private final LocationRepository locationRepository;
@@ -67,9 +67,6 @@ public class DataLoader implements CommandLineRunner {
     @Value("${spring.jpa.hibernate.ddl-auto}")
     private String modeType;
 
-    @Value("${app.running}")
-    private String activeProfile;
-
     @Value("${app.sms.sender-email}")
     private String senderEmail;
 
@@ -78,7 +75,6 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        System.out.println("activeProfile = " + activeProfile);
         if (Objects.equals("create", modeType)) {
 //            smsSender.login(LoginRequest
 //                    .builder()
@@ -88,13 +84,11 @@ public class DataLoader implements CommandLineRunner {
             addAdmin();
             saveManagerRole();
             saveClientRole();
-            if (!activeProfile.equals("test")) {
-                initLocations();
-                initInstitutionTypes();
-                initInstitutions();
-                initCategories();
-                initProducts();
-            }
+            initLocations();
+            initInstitutionTypes();
+            initInstitutions();
+            initCategories();
+            initProducts();
         }
     }
 

@@ -23,9 +23,8 @@ public class InstitutionEditDTO extends InstitutionAddDTO {
                               String descriptionRu,
                               Long id,
                               LocationDto location,
-                              Long institutionTypeId,
-                              Long managerId) {
-        super(nameUz, nameRu, descriptionUz, descriptionRu, location, institutionTypeId, managerId);
+                              Long institutionTypeId) {
+        super(nameUz, nameRu, descriptionUz, descriptionRu, location, institutionTypeId);
         this.id = id;
     }
 
