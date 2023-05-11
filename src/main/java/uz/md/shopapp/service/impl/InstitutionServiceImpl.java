@@ -205,7 +205,6 @@ public class InstitutionServiceImpl implements InstitutionService {
                 .getContent());
     }
 
-    @Async
     @Override
     public ApiResult<Void> setImage(Long institutionId, MultipartFile image) {
 
