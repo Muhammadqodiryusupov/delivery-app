@@ -58,7 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     public User getUserFromBearerToken(String token) {
         try {
-            token = token.substring("Bearer".length()).trim();
+            token = token.substring("Bearer".length() + 7).trim();
             if (jwtTokenProvider.isValidToken(token, true)) {
                 String userPhoneNumber = jwtTokenProvider.extractUserPhoneNumber(token, true);
                 return userRepository
