@@ -16,14 +16,13 @@ import uz.md.shopapp.dtos.request.SimpleSearchRequest;
 import uz.md.shopapp.dtos.request.SimpleSortRequest;
 import uz.md.shopapp.exceptions.AlreadyExistsException;
 import uz.md.shopapp.exceptions.BadRequestException;
-import uz.md.shopapp.exceptions.NotAllowedException;
 import uz.md.shopapp.exceptions.NotFoundException;
+import uz.md.shopapp.file_storage.FilesStorageService;
 import uz.md.shopapp.mapper.ProductMapper;
 import uz.md.shopapp.repository.CategoryRepository;
 import uz.md.shopapp.repository.ProductRepository;
 import uz.md.shopapp.repository.UserRepository;
 import uz.md.shopapp.service.QueryService;
-import uz.md.shopapp.file_storage.FilesStorageService;
 import uz.md.shopapp.service.contract.ProductService;
 import uz.md.shopapp.utils.CommonUtils;
 
@@ -110,16 +109,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
-    private User getCurrentUser() {
-        String phoneNumber = CommonUtils.getCurrentUserPhoneNumber();
-        return userRepository
-                .findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> NotFoundException.builder()
-                        .messageUz("USER_NOT_FOUND")
-                        .messageRu("")
-                        .build());
-    }
-
     @Override
     public ApiResult<ProductDTO> edit(ProductEditDTO editDTO) {
 
@@ -136,13 +125,10 @@ public class ProductServiceImpl implements ProductService {
 
         Product product = productRepository
                 .findById(editDTO.getId())
-                .orElseThrow(() -> {
-                    throw NotFoundException.builder()
-                            .messageRu("")
-                            .messageUz("PRODUCT_NOT_FOUND")
-                            .build();
-
-                });
+                .orElseThrow(() -> NotFoundException.builder()
+                        .messageRu("")
+                        .messageUz("PRODUCT_NOT_FOUND")
+                        .build());
 
         if (productRepository.existsByNameUzOrNameRuAndIdIsNot(editDTO.getNameUz(), editDTO.getNameRu(), product.getId()))
 
@@ -172,8 +158,6 @@ public class ProductServiceImpl implements ProductService {
                     .messageUz(ERROR_IN_REQUEST_UZ)
                     .messageRu(ERROR_IN_REQUEST_RU)
                     .build();
-
-        Long managerId = productRepository.findMangerIdById(id);
 
         if (!productRepository.existsById(id))
             throw NotFoundException.builder()

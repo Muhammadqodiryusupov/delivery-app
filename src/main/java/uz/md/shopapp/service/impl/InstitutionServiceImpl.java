@@ -16,7 +16,6 @@ import uz.md.shopapp.dtos.institution.InstitutionEditDTO;
 import uz.md.shopapp.dtos.institution.InstitutionInfoDTO;
 import uz.md.shopapp.exceptions.AlreadyExistsException;
 import uz.md.shopapp.exceptions.BadRequestException;
-import uz.md.shopapp.exceptions.NotAllowedException;
 import uz.md.shopapp.exceptions.NotFoundException;
 import uz.md.shopapp.file_storage.FilesStorageService;
 import uz.md.shopapp.mapper.InstitutionMapper;
