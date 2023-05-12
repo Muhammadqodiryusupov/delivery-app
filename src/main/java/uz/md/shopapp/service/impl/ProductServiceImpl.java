@@ -20,7 +20,6 @@ import uz.md.shopapp.file_storage.FilesStorageService;
 import uz.md.shopapp.mapper.ProductMapper;
 import uz.md.shopapp.repository.CategoryRepository;
 import uz.md.shopapp.repository.ProductRepository;
-import uz.md.shopapp.repository.UserRepository;
 import uz.md.shopapp.service.QueryService;
 import uz.md.shopapp.service.contract.ProductService;
 

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.md.shopapp.domain.Category;
 import uz.md.shopapp.domain.Institution;
-import uz.md.shopapp.domain.User;
 import uz.md.shopapp.dtos.ApiResult;
 import uz.md.shopapp.dtos.category.CategoryAddDTO;
 import uz.md.shopapp.dtos.category.CategoryDTO;
@@ -19,9 +18,7 @@ import uz.md.shopapp.exceptions.NotFoundException;
 import uz.md.shopapp.mapper.CategoryMapper;
 import uz.md.shopapp.repository.CategoryRepository;
 import uz.md.shopapp.repository.InstitutionRepository;
-import uz.md.shopapp.repository.UserRepository;
 import uz.md.shopapp.service.contract.CategoryService;
-import uz.md.shopapp.utils.CommonUtils;
 
 import java.util.List;
 
@@ -36,7 +33,6 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
     private final InstitutionRepository institutionRepository;
-    private final UserRepository userRepository;
 
 
     @Override
