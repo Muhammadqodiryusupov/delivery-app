@@ -89,14 +89,6 @@ public class InstitutionServiceImpl implements InstitutionService {
                         .messageRu("Менеджер не найден")
                         .build());
 
-        if (!(manager.getRole().getName().equals("MANAGER") || manager.getRole().getName().equals("ADMIN"))) {
-            log.info("not allowed to access coz you are not manager");
-            throw NotAllowedException.builder()
-                    .messageUz("Ushbu " + manager.getId() + " IDli foydalanuvchi manejer emas")
-                    .messageRu("Пользователь с идентификатором " + manager.getId() + " не является менеджером")
-                    .build();
-        }
-
         institution.setManager(manager);
         return ApiResult
                 .successResponse(institutionMapper

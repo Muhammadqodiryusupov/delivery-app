@@ -87,8 +87,6 @@ public class ProductServiceImpl implements ProductService {
                     .messageRu(ERROR_IN_REQUEST_RU)
                     .build();
 
-        checkForPermission(dto);
-
         if (productRepository.existsByNameUzOrNameRu(dto.getNameUz(), dto.getNameRu()))
             throw AlreadyExistsException.builder()
                     .messageRu("")
@@ -111,29 +109,7 @@ public class ProductServiceImpl implements ProductService {
                                 .save(product)));
     }
 
-    private void checkForPermission(ProductAddDTO dto) {
-        Long managerId = categoryRepository.findMangerIdByCategoryId(dto.getCategoryId());
-        checkForPermission(managerId);
-    }
 
-    private void checkForPermission(Long managerId) {
-        if (managerId == null)
-            throw NotFoundException.builder()
-                    .messageRu("")
-                    .messageUz("PRODUCT_OR_ITS_CATEGORY_NOT_FOUND")
-                    .build();
-
-
-        User currentUser = getCurrentUser();
-
-        if (!currentUser.getRole().getName().equals("ADMIN"))
-            if (!currentUser.getId().equals(managerId))
-                throw NotAllowedException.builder()
-                        .messageRu("")
-                        .messageUz("YOU HAVE NO PERMISSION")
-                        .build();
-    }
-    
     private User getCurrentUser() {
         String phoneNumber = CommonUtils.getCurrentUserPhoneNumber();
         return userRepository
@@ -157,8 +133,6 @@ public class ProductServiceImpl implements ProductService {
                     .messageUz(ERROR_IN_REQUEST_UZ)
                     .messageRu(ERROR_IN_REQUEST_RU)
                     .build();
-
-        checkForPermission(editDTO);
 
         Product product = productRepository
                 .findById(editDTO.getId())
@@ -200,8 +174,6 @@ public class ProductServiceImpl implements ProductService {
                     .build();
 
         Long managerId = productRepository.findMangerIdById(id);
-
-        checkForPermission(managerId);
 
         if (!productRepository.existsById(id))
             throw NotFoundException.builder()

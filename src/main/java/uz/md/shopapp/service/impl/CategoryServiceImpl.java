@@ -56,26 +56,12 @@ public class CategoryServiceImpl implements CategoryService {
                     .build();
         }
 
-        User currentUser = getCurrentUser();
-
         Institution institution = institutionRepository
                 .findById(dto.getInstitutionId())
                 .orElseThrow(() -> NotFoundException.builder()
                         .messageUz("Muassasa topilmadi")
                         .messageRu("Объект не найден")
                         .build());
-
-        if (currentUser.getRole() == null
-                || !currentUser.getRole().getPermissions().contains(PermissionEnum.ADD_CATEGORY))
-            if (institution.getManager() == null
-                    || institution.getManager().getId() == null
-                    || !institution.getManager().getId().equals(currentUser.getId())) {
-                log.error("You have no permissions to add category");
-                throw NotAllowedException.builder()
-                        .messageUz("Sizda ruxsat yo'q")
-                        .messageRu("У вас нет разрешения")
-                        .build();
-            }
 
         if (categoryRepository.existsByNameUzOrNameRu(dto.getNameUz(), dto.getNameRu())) {
             log.error("Category name already existed");
@@ -89,7 +75,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .fromAddDTO(dto);
 
         if (category == null) {
-            log.error("Adding Category is null");
+            log.error("Added Category is null");
             throw BadRequestException.builder()
                     .messageUz(CATEGORY_IS_NULL_UZ)
                     .messageRu(CATEGORY_IS_NULL_RU)
@@ -141,7 +127,7 @@ public class CategoryServiceImpl implements CategoryService {
                     .build();
         }
 
-        User currentUser = getCurrentUser();
+
         Institution institution = institutionRepository
                 .findById(editDTO.getInstitutionId())
                 .orElseThrow(() -> NotFoundException.builder()
@@ -149,15 +135,6 @@ public class CategoryServiceImpl implements CategoryService {
                         .messageRu(INSTITUTION_NOT_FOUND_RU)
                         .build());
 
-        if (!currentUser.getRole().getName().equals("ADMIN"))
-            if (!institution.getManager().getId().equals(currentUser.getId())) {
-                log.error("You have no permission");
-                throw NotAllowedException
-                        .builder()
-                        .messageUz(YOU_HAVE_NO_PERMISSION_UZ)
-                        .messageRu(YOU_HAVE_NO_PERMISSION_RU)
-                        .build();
-            }
 
         Category editing = categoryRepository
                 .findById(editDTO.getId())
@@ -258,16 +235,6 @@ public class CategoryServiceImpl implements CategoryService {
                     .messageUz("Kategoriya topilmadi")
                     .messageRu("категория не найдена")
                     .build();
-
-        Long managerId = categoryRepository.findMangerIdByCategoryId(id);
-        User currentUser = getCurrentUser();
-
-        if (!currentUser.getRole().getName().equals("ADMIN"))
-            if (!currentUser.getId().equals(managerId))
-                throw NotAllowedException.builder()
-                        .messageUz("Sizda ruxsat yo'q")
-                        .messageRu("У вас нет разрешения")
-                        .build();
 
         categoryRepository.deleteById(id);
         return ApiResult.successResponse();
