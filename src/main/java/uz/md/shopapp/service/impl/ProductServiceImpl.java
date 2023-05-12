@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import uz.md.shopapp.domain.Category;
 import uz.md.shopapp.domain.Product;
-import uz.md.shopapp.domain.User;
 import uz.md.shopapp.dtos.ApiResult;
 import uz.md.shopapp.dtos.product.ProductAddDTO;
 import uz.md.shopapp.dtos.product.ProductDTO;
@@ -24,7 +23,6 @@ import uz.md.shopapp.repository.ProductRepository;
 import uz.md.shopapp.repository.UserRepository;
 import uz.md.shopapp.service.QueryService;
 import uz.md.shopapp.service.contract.ProductService;
-import uz.md.shopapp.utils.CommonUtils;
 
 import java.util.List;
 
@@ -42,7 +40,6 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final QueryService queryService;
     private final FilesStorageService filesStorageService;
-    private final UserRepository userRepository;
 
     private Product getById(Long id) {
         if (id == null)
@@ -52,13 +49,10 @@ public class ProductServiceImpl implements ProductService {
                     .build();
         return productRepository
                 .findById(id)
-                .orElseThrow(() -> {
-                    throw NotFoundException.builder()
-                            .messageRu("")
-                            .messageUz("PRODUCT_NOT_FOUND_WITH_ID" + id)
-                            .build();
-
-                });
+                .orElseThrow(() -> NotFoundException.builder()
+                        .messageRu("")
+                        .messageUz("PRODUCT_NOT_FOUND_WITH_ID" + id)
+                        .build());
     }
 
     @Override

@@ -155,23 +155,6 @@ public class CategoryServiceImpl implements CategoryService {
                 .toDTO(categoryRepository.save(category)));
     }
 
-    private User getCurrentUser() {
-
-        log.info("getCurrentUser called");
-        String phoneNumber = CommonUtils.getCurrentUserPhoneNumber();
-        if (phoneNumber != null)
-            return userRepository
-                    .findByPhoneNumber(phoneNumber)
-                    .orElseThrow(() -> NotFoundException.builder()
-                            .messageUz("Ushbu raqamli Foydalanuvchi topilmadi")
-                            .messageRu("Этот цифровой Пользователь не найден")
-                            .build());
-        throw NotFoundException.builder()
-                .messageUz("Ushbu raqamli Foydalanuvchi topilmadi")
-                .messageRu("Этот цифровой Пользователь не найден")
-                .build();
-    }
-
     @Override
     public ApiResult<List<CategoryDTO>> getAll() {
         log.info("getAll called");
