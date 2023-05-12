@@ -1,9 +1,13 @@
 package uz.md.shopapp.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -12,6 +16,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uz.md.shopapp.IntegrationTest;
 import uz.md.shopapp.controller.InstitutionTypeController;
 import uz.md.shopapp.domain.InstitutionType;
+import uz.md.shopapp.domain.User;
+import uz.md.shopapp.dtos.institution_type.InstitutionTypeAddDTO;
 import uz.md.shopapp.repository.InstitutionTypeRepository;
 import uz.md.shopapp.util.MockDataGenerator;
 
@@ -27,6 +33,12 @@ public class InstitutionTypeControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private MockDataGenerator mockDataGenerator;
@@ -66,7 +78,7 @@ public class InstitutionTypeControllerTest {
                 .andExpect(jsonPath("$.statusCode").value(200))
                 .andExpect(jsonPath("$.data.length()").value(10));
 
-        testForEquality(perform, types.subList(0,10));
+        testForEquality(perform, types.subList(0, 10));
 
         long afterCall = institutionTypeRepository.count();
         Assertions.assertEquals(afterCall, beforeCall);
@@ -84,12 +96,32 @@ public class InstitutionTypeControllerTest {
                 .andExpect(jsonPath("$.statusCode").value(200))
                 .andExpect(jsonPath("$.data.length()").value(10));
 
-        testForEquality(perform, types.subList(10,20));
+        testForEquality(perform, types.subList(10, 20));
 
         long afterCall = institutionTypeRepository.count();
         Assertions.assertEquals(afterCall, beforeCall);
     }
 
+    @WithMockUser(username = "+998931668648", password = "123")
+    @Test
+    void shouldAdd() throws Exception {
+        User mockEmployee = mockDataGenerator.getMockEmployee();
+        mockEmployee.setPhoneNumber("+998931668648");
+        mockEmployee.setPassword(passwordEncoder.encode("123"));
+        InstitutionTypeAddDTO addDTO = new InstitutionTypeAddDTO();
+        addDTO.setNameUz("nameU");
+        addDTO.setNameRu("nameR");
+        addDTO.setDescriptionUz("description");
+        addDTO.setDescriptionRu("description");
+        ResultActions perform = mockMvc.perform(MockMvcRequestBuilders
+                .post(BASE_URL + "/add")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(addDTO)));
+        perform.andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.statusCode").value(200));
+
+    }
 
 
     private void testForEquality(ResultActions perform, List<InstitutionType> types) {

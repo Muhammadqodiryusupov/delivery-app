@@ -14,10 +14,12 @@ import uz.md.shopapp.config.security.JwtAuthenticationFilter;
 import uz.md.shopapp.domain.User;
 import uz.md.shopapp.domain.enums.PermissionEnum;
 import uz.md.shopapp.exceptions.NotAllowedException;
+import uz.md.shopapp.repository.UserRepository;
 import uz.md.shopapp.utils.AppConstants;
 import uz.md.shopapp.utils.CommonUtils;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import static uz.md.shopapp.utils.CommonUtils.currentRequest;
@@ -29,6 +31,7 @@ import static uz.md.shopapp.utils.CommonUtils.currentRequest;
 @Component
 @RequiredArgsConstructor
 public class CheckAuthAspect {
+    private final UserRepository userRepository;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Before(value = "@annotation(checkAuth)")
@@ -40,20 +43,24 @@ public class CheckAuthAspect {
 
         HttpServletRequest httpServletRequest = currentRequest();
 
-        String token = getTokenFromRequest(httpServletRequest);
+        String userPhoneNumber = CommonUtils.getCurrentUserPhoneNumber();
+        User currentUser = userRepository
+                .findByPhoneNumber(userPhoneNumber)
+                .orElseThrow(() -> NotAllowedException.builder()
+                        .messageUz("FORBIDDEN")
+                        .messageRu("")
+                        .build());
 
-        User userFromBearerToken = jwtAuthenticationFilter.getUserFromBearerToken(token);
-
-        if (userFromBearerToken != null && userFromBearerToken.getId() != null) {
+        if (currentUser != null && currentUser.getId() != null) {
 
             PermissionEnum[] permission = checkAuth.permission();
-            if (permission.length > 0 && notPermission(userFromBearerToken.getRole().getPermissions(), permission)) {
+            if (permission.length > 0 && notPermission(currentUser.getRole().getPermissions(), permission)) {
                 throw NotAllowedException.builder()
                         .messageUz("FORBIDDEN")
                         .messageRu("")
                         .build();
             }
-            httpServletRequest.setAttribute(AppConstants.REQUEST_ATTRIBUTE_CURRENT_USER, userFromBearerToken);
+            httpServletRequest.setAttribute(AppConstants.REQUEST_ATTRIBUTE_CURRENT_USER, currentUser);
         } else
             throw NotAllowedException.builder()
                     .messageUz("FORBIDDEN")
@@ -62,20 +69,6 @@ public class CheckAuthAspect {
     }
 
 
-    private String getTokenFromRequest(HttpServletRequest httpServletRequest) {
-        try {
-            String token = httpServletRequest.getHeader(AppConstants.AUTHORIZATION_HEADER);
-            if (Objects.isNull(token) || token.isEmpty()) {
-                throw NotAllowedException.builder()
-                        .messageUz("FORBIDDEN")
-                        .messageRu("")
-                        .build();
-            }
-            return token;
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
-    }
 
     private boolean notPermission(Set<PermissionEnum> hasPermission, PermissionEnum[] mustPermission) {
         if (Objects.isNull(hasPermission) || hasPermission.isEmpty()) {
@@ -88,10 +81,4 @@ public class CheckAuthAspect {
         return true;
     }
 
-    private void setUserIdAndPermissionFromRequest(HttpServletRequest httpServletRequest) {
-        String userId = CommonUtils.getUserIdFromRequest(httpServletRequest);
-        String permissions = CommonUtils.getUserPermissionsFromRequest(httpServletRequest);
-        httpServletRequest.setAttribute(AppConstants.REQUEST_ATTRIBUTE_CURRENT_USER_ID, userId);
-        httpServletRequest.setAttribute(AppConstants.REQUEST_ATTRIBUTE_CURRENT_USER_PERMISSIONS, permissions);
-    }
 }

@@ -8,7 +8,7 @@ import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 import org.testcontainers.shaded.org.apache.commons.lang3.RandomUtils;
 import uz.md.shopapp.domain.*;
 import uz.md.shopapp.domain.enums.PermissionEnum;
-import uz.md.shopapp.repository.InstitutionTypeRepository;
+import uz.md.shopapp.repository.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +23,14 @@ public class MockDataGenerator {
     private final Faker FAKER = new Faker();
     @Autowired
     private InstitutionTypeRepository institutionTypeRepository;
+    @Autowired
+    private InstitutionRepository institutionRepository;
+    @Autowired
+    private LocationRepository locationRepository;
+    @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     public InstitutionType getInstitutionTypeSaved() {
         return institutionTypeRepository.save(getInstitutionType());
@@ -50,6 +58,32 @@ public class MockDataGenerator {
     public List<InstitutionType> getInstitutionTypesSaved(int count) {
         return institutionTypeRepository.saveAll(IntStream.range(0, count)
                 .mapToObj(this::getInstitutionType)
+                .collect(Collectors.toList()));
+    }
+
+    public Institution getInstitution(int index, InstitutionType type, User employee) {
+        Location location = getLocation();
+        locationRepository.save(location);
+        return Institution.builder()
+                .nameUz("Cafe " + index)
+                .nameRu("Cafe ru " + index)
+                .descriptionUz("Cafe description " + index)
+                .descriptionUz("Cafe description ru" + index)
+                .location(location)
+                .manager(employee)
+                .type(type)
+                .build();
+    }
+
+    public List<Institution> getInstitutionsSaved(int count, InstitutionType type, User employee) {
+        return institutionRepository.saveAll(IntStream.range(0, count)
+                .mapToObj(value -> getInstitution(value, type, employee))
+                .collect(Collectors.toList()));
+    }
+
+    public List<Institution> getInstitutionsSaved(int count, int indexFrom, InstitutionType type, User employee) {
+        return institutionRepository.saveAll(IntStream.range(indexFrom, indexFrom + count)
+                .mapToObj(value -> getInstitution(value, type, employee))
                 .collect(Collectors.toList()));
     }
 
@@ -127,10 +161,12 @@ public class MockDataGenerator {
     }
 
     public User getMockEmployee() {
-        Role adminRole = getAdminRole();
+        Role admin = roleRepository
+                .findByName("ADMIN")
+                .orElse(roleRepository.save(getAdminRole()));
         User user = getUser();
-        user.setRole(adminRole);
-        return user;
+        user.setRole(admin);
+        return userRepository.save(user);
     }
 
     private User getUser() {
@@ -161,18 +197,5 @@ public class MockDataGenerator {
                 .build();
     }
 
-    public Institution getInstitution() {
-        String random = RandomStringUtils.random(5, true, false);
-        Location location = getLocation();
-        InstitutionType institutionType = getInstitutionType();
-        return Institution.builder()
-                .nameUz("Cafe " + random)
-                .nameRu("Cafe ru " + random)
-                .descriptionUz("Cafe description " + random)
-                .descriptionUz("Cafe description ru" + random)
-                .location(location)
-                .type(institutionType)
-                .build();
-    }
 
 }

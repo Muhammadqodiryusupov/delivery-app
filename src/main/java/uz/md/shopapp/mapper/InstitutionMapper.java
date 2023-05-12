@@ -17,6 +17,10 @@ public interface InstitutionMapper extends EntityMapper<Institution, Institution
 
     Institution fromEditDTO(InstitutionEditDTO editDTO, @MappingTarget Institution editing);
 
+    @Override
+    @Mapping(target = "institutionTypeId", source = "type.id")
+    InstitutionDTO toDTO(Institution entity);
+
     @Mapping(target = "managerId", source = "manager.id")
     @Mapping(target = "institutionTypeId", source = "type.id")
     InstitutionInfoDTO toInfoDTO(Institution institution);

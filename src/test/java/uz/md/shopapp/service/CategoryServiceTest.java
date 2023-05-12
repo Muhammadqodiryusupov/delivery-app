@@ -75,9 +75,10 @@ public class CategoryServiceTest {
                 )
                 .password(passwordEncoder.encode("123"))
                 .build();
-
-        institution = mockDataGenerator.getInstitution();
-        institutionType = institution.getType();
+        InstitutionType type = mockDataGenerator.getInstitutionType();
+        institutionTypeRepository.save(type);
+        User employee = mockDataGenerator.getMockEmployee();
+        institution = mockDataGenerator.getInstitution(1, type, employee);
 
         userRepository.save(manager);
         institution.setManager(manager);

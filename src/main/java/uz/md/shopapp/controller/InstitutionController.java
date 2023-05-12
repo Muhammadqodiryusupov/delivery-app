@@ -19,7 +19,7 @@ import uz.md.shopapp.utils.AppConstants;
 import java.util.List;
 
 @RestController
-@RequestMapping(InstitutionController.BASE_URL + "/")
+@RequestMapping(InstitutionController.BASE_URL)
 @RequiredArgsConstructor
 @Tag(name = "Institution", description = "Endpoints for Institution")
 @Slf4j
@@ -50,14 +50,14 @@ public class InstitutionController {
         return institutionService.getAllForInfoByPage(page);
     }
 
-    @GetMapping("/all/by_type/{id}")
+    @GetMapping("/all/by-type/{id}")
     @Operation(description = "Get all institutions by type")
     public ApiResult<List<InstitutionInfoDTO>> getAllByType(@PathVariable("id") Long typeId) {
         log.info("getting all institutions by type");
         return institutionService.getAllByTypeId(typeId);
     }
 
-    @GetMapping("/all/by_manager/{id}")
+    @GetMapping("/all/by-manager/{id}")
     @Operation(description = "Get all institutions by type")
     @CheckAuth(permission = PermissionEnum.GET_INSTITUTION)
     public ApiResult<List<InstitutionInfoDTO>> getAllByManager(@PathVariable("id") Long managerId) {
