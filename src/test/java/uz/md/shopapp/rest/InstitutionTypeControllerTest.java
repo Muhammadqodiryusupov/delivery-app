@@ -18,6 +18,7 @@ import uz.md.shopapp.controller.InstitutionTypeController;
 import uz.md.shopapp.domain.InstitutionType;
 import uz.md.shopapp.domain.User;
 import uz.md.shopapp.dtos.institution_type.InstitutionTypeAddDTO;
+import uz.md.shopapp.dtos.institution_type.InstitutionTypeEditDTO;
 import uz.md.shopapp.repository.InstitutionTypeRepository;
 import uz.md.shopapp.util.MockDataGenerator;
 
@@ -119,10 +120,61 @@ public class InstitutionTypeControllerTest {
                 .content(objectMapper.writeValueAsString(addDTO)));
         perform.andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.statusCode").value(200));
-
+                .andExpect(jsonPath("$.statusCode").value(200))
+                .andExpect(jsonPath("$.data.nameUz").value(addDTO.getNameUz()))
+                .andExpect(jsonPath("$.data.nameRu").value(addDTO.getNameRu()))
+                .andExpect(jsonPath("$.data.descriptionUz").value(addDTO.getDescriptionUz()))
+                .andExpect(jsonPath("$.data.descriptionRu").value(addDTO.getDescriptionRu()));
     }
 
+    @WithMockUser(username = "+998931668648", password = "123")
+    @Test
+    void shouldEdit() throws Exception {
+        User mockEmployee = mockDataGenerator.getMockEmployee();
+        mockEmployee.setPhoneNumber("+998931668648");
+        mockEmployee.setPassword(passwordEncoder.encode("123"));
+
+        InstitutionType type = mockDataGenerator.getInstitutionType();
+        institutionTypeRepository.save(type);
+
+        InstitutionTypeEditDTO editDTO = new InstitutionTypeEditDTO();
+        editDTO.setId(type.getId());
+        editDTO.setNameUz("nameU");
+        editDTO.setNameRu("nameR");
+        editDTO.setDescriptionUz("description");
+        editDTO.setDescriptionRu("description");
+        ResultActions perform = mockMvc.perform(MockMvcRequestBuilders
+                .post(BASE_URL + "/add")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(editDTO)));
+        perform.andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.statusCode").value(200))
+                .andExpect(jsonPath("$.data.nameUz").value(editDTO.getNameUz()))
+                .andExpect(jsonPath("$.data.nameRu").value(editDTO.getNameRu()))
+                .andExpect(jsonPath("$.data.descriptionUz").value(editDTO.getDescriptionUz()))
+                .andExpect(jsonPath("$.data.descriptionRu").value(editDTO.getDescriptionRu()));
+    }
+
+    @WithMockUser(username = "+998931668648", password = "123")
+    @Test
+    void shouldDelete() throws Exception {
+        User mockEmployee = mockDataGenerator.getMockEmployee();
+        mockEmployee.setPhoneNumber("+998931668648");
+        mockEmployee.setPassword(passwordEncoder.encode("123"));
+
+        InstitutionType type = mockDataGenerator.getInstitutionType();
+        institutionTypeRepository.save(type);
+
+        ResultActions perform = mockMvc.perform(MockMvcRequestBuilders
+                .post(BASE_URL + "/delete/"+type.getId()));
+        perform.andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.statusCode").value(200));
+
+        institutionTypeRepository.count();
+
+    }
 
     private void testForEquality(ResultActions perform, List<InstitutionType> types) {
         for (int i = 0; i < types.size(); i++) {

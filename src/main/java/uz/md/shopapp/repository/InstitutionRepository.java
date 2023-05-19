@@ -29,4 +29,7 @@ public interface InstitutionRepository extends JpaRepository<Institution, Long> 
 
     @Query("select new uz.md.shopapp.dtos.institution.InstitutionInfoDTO(i.id, i.nameUz,i.nameRu,i.imageUrl, i.descriptionUz,i.descriptionRu, i.type.id, i.manager.id) from Institution i where i.deleted = false")
     Page<InstitutionInfoDTO> findAllForInfo(Pageable pageable);
+
+    @Query("from Institution i join i.categories c join c.products p where p.nameUz like :key or p.nameRu like :key")
+    List<Institution> findByProductName(String key);
 }

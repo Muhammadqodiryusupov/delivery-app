@@ -171,7 +171,6 @@ public class InstitutionTypeServiceImpl implements InstitutionTypeService {
 
         log.info("deleting institutionType with id " + id);
 
-
         if (id == null)
             throw BadRequestException.builder()
                     .messageUz(ERROR_IN_REQUEST_UZ)

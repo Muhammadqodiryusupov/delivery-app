@@ -27,12 +27,14 @@ public class InstitutionDTO {
     public InstitutionDTO(Long id,
                           String nameUz,
                           String nameRu,
+                          String imageUrl,
                           String descriptionUz,
                           String descriptionRu,
                           List<CategoryDTO> categories) {
         this.id = id;
         this.nameUz = nameUz;
         this.nameRu = nameRu;
+        this.imageUrl = imageUrl;
         this.descriptionUz = descriptionUz;
         this.descriptionRu = descriptionRu;
         this.categories = categories;

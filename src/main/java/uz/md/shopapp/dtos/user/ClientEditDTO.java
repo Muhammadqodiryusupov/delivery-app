@@ -10,7 +10,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ClientEditDTO {
-    private Long id;
     private String firstName;
     private String lastName;
 }

@@ -19,7 +19,7 @@ import uz.md.shopapp.utils.AppConstants;
 import java.util.List;
 
 @RestController
-@RequestMapping(ProductController.BASE_URL + "/")
+@RequestMapping(ProductController.BASE_URL)
 @RequiredArgsConstructor
 @Tag(name = "Product", description = "Endpoints for Product")
 @Slf4j

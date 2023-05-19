@@ -74,7 +74,7 @@ public class InstitutionControllerIT {
     }
 
     @Test
-    void shouldGetAllInstitutionById() throws Exception {
+    void shouldGetInstitutionById() throws Exception {
         InstitutionType type = mockDataGenerator.getInstitutionType();
         institutionTypeRepository.save(type);
         User mockEmployee = mockDataGenerator.getMockEmployee();
@@ -93,7 +93,16 @@ public class InstitutionControllerIT {
                 .andExpect(jsonPath("$.data.institutionTypeId").value(institution.getType().getId()));
     }
 
-
+    @Test
+    void shouldDeleteInstitution() throws Exception {
+        InstitutionType type = mockDataGenerator.getInstitutionType();
+        institutionTypeRepository.save(type);
+        User mockEmployee = mockDataGenerator.getMockEmployee();
+        Institution institution = mockDataGenerator.getInstitution(1, type, mockEmployee);
+        institutionRepository.save(institution);
+        ResultActions perform = mockMvc.perform(MockMvcRequestBuilders
+                .get(BASE_URL + "/" + institution.getId()));
+    }
 
     private void checkForResult(List<Institution> institutions, ResultActions perform) throws Exception {
         for (int i = 0; i < institutions.size(); i++) {

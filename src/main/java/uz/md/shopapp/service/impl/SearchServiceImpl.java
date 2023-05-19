@@ -1,15 +1,16 @@
 package uz.md.shopapp.service.impl;
 
-import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uz.md.shopapp.domain.Category;
+import uz.md.shopapp.domain.Institution;
 import uz.md.shopapp.domain.Product;
 import uz.md.shopapp.dtos.ApiResult;
 import uz.md.shopapp.dtos.category.CategoryDTO;
 import uz.md.shopapp.dtos.institution.InstitutionDTO;
 import uz.md.shopapp.dtos.institution.InstitutionInfoDTO;
-import uz.md.shopapp.mapper.ProductMapper;
+import uz.md.shopapp.mapper.CategoryMapper;
+import uz.md.shopapp.mapper.InstitutionMapper;
 import uz.md.shopapp.repository.InstitutionRepository;
 import uz.md.shopapp.service.QueryService;
 import uz.md.shopapp.service.contract.SearchService;
@@ -24,18 +25,14 @@ import java.util.Map;
 public class SearchServiceImpl implements SearchService {
 
     private final QueryService queryService;
-    private final ProductMapper productMapper;
+    private final InstitutionMapper institutionMapper;
+    private final CategoryMapper categoryMapper;
     private final InstitutionRepository institutionRepository;
 
     @Override
     public ApiResult<List<InstitutionDTO>> getBySearch(String value) {
-        TypedQuery<Product> productTypedQuery = queryService.generateSearchQuery(Product.class, value);
-
-        List<Product> productList = productTypedQuery.getResultList();
-
-        List<CategoryDTO> categories = groupProductsByCategory(productList);
-
-        return ApiResult.successResponse(groupCategoriesByInstitution(categories));
+        List<Institution> institutions = institutionRepository.findByProductName("%" + value + "%");
+        return ApiResult.successResponse(institutionMapper.toDTOList(institutions));
     }
 
     private List<InstitutionDTO> groupCategoriesByInstitution(List<CategoryDTO> categories) {
@@ -53,6 +50,7 @@ public class SearchServiceImpl implements SearchService {
                     info.getId(),
                     info.getNameUz(),
                     info.getNameRu(),
+                    info.getImageUrl(),
                     info.getDescriptionUz(),
                     info.getDescriptionRu(),
                     categoryDTOS
@@ -70,16 +68,7 @@ public class SearchServiceImpl implements SearchService {
         }
 
         List<CategoryDTO> result = new ArrayList<>();
-        map.forEach((category, products) -> {
-            result.add(new CategoryDTO(
-                    category.getId(),
-                    category.getNameUz(),
-                    category.getNameRu(),
-                    category.getDescriptionUz(),
-                    category.getDescriptionRu(),
-                    category.getInstitution().getId(),
-                    productMapper.toDTOList(products)));
-        });
+        map.forEach((category, products) -> result.add(categoryMapper.toDTO(category)));
         return result;
     }
 
