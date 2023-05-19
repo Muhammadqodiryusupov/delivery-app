@@ -15,6 +15,7 @@ public interface ProductMapper extends EntityMapper<Product, ProductDTO> {
 
     @Override
     @Mapping(target = "categoryId", source = "category.id")
+    @Mapping(target = "institutionId", source = "category.institution.id")
     ProductDTO toDTO(Product entity);
 
     Product fromEditDTO(ProductEditDTO editDTO, @MappingTarget Product product);

@@ -9,7 +9,7 @@ import uz.md.shopapp.dtos.institution.InstitutionDTO;
 import uz.md.shopapp.dtos.institution.InstitutionEditDTO;
 import uz.md.shopapp.dtos.institution.InstitutionInfoDTO;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {CategoryMapper.class, ProductMapper.class})
 public interface InstitutionMapper extends EntityMapper<Institution, InstitutionDTO> {
 
 

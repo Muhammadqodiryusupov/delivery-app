@@ -11,7 +11,7 @@ import uz.md.shopapp.dtos.category.CategoryInfoDTO;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {ProductMapper.class})
 public interface CategoryMapper extends EntityMapper<Category, CategoryDTO> {
 
     Category fromAddDTO(CategoryAddDTO dto);
